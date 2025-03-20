@@ -1,13 +1,14 @@
-// src/pages/LoginPage.tsx
 import React, { useState } from 'react';
 import { Button, TextField, Box, Typography, IconButton, InputAdornment, Grid, Card, CardContent } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
+import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
+import { login } from '../services/auth';
+import {  useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handlePasswordToggle = () => {
     setShowPassword(!showPassword);
@@ -18,8 +19,9 @@ export default function LoginPage() {
     return re.test(String(email).toLowerCase());
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     if (!validateEmail(email)) {
       alert('Please enter a valid email address.');
       return;
@@ -28,13 +30,32 @@ export default function LoginPage() {
       alert('Password must be at least 6 characters long.');
       return;
     }
-    // Handle login logic here
-    console.log('Logging in with', { email, password });
+  
+    try {
+      console.log("email and password", email, password);
+  
+      const response = await login({ email, password });
+  
+      console.log("response:", response);
+  
+      if (response?.status === 201) {
+        console.log("Login successful, navigating to home...");
+        navigate('/');
+      } else {
+        console.log("Unexpected response status:", response?.status);
+        alert('Login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      const errorMessage = error?.response?.data?.message || 'Something went wrong, please try again later.';
+      alert(errorMessage);
+    }
   };
+  
+  
 
   return (
     <Grid container sx={{ minHeight: '100vh' }}>
-      {/* Left Side Image */}
       <Grid item xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
         <Box
           sx={{
@@ -45,7 +66,6 @@ export default function LoginPage() {
         />
       </Grid>
 
-      {/* Right Side Form */}
       <Grid item xs={12} md={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#EAEBEF' }}>
         <Card
           sx={{
@@ -58,21 +78,17 @@ export default function LoginPage() {
           }}
         >
           <CardContent>
-            {/* Logo */}
             <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: 2 }}>
               <Box sx={{ backgroundColor: 'black', color: 'white', width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', fontSize: '24px' }}>
                 A
               </Box>
             </Box>
 
-            {/* Brand Name */}
             <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2, color: 'dark' }}>
               AIDIPH
             </Typography>
 
-            {/* Login Form */}
             <form onSubmit={handleLogin}>
-              {/* Email Input */}
               <TextField
                 label="Email"
                 variant="outlined"
@@ -84,13 +100,12 @@ export default function LoginPage() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <img src="https://img.icons8.com/ios/452/email.png" width="20" alt="email" />
+                      <Email />
                     </InputAdornment>
                   ),
                 }}
               />
 
-              {/* Password Input */}
               <TextField
                 label="Password"
                 variant="outlined"
@@ -103,7 +118,7 @@ export default function LoginPage() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <img src="https://img.icons8.com/ios/452/lock.png" width="20" alt="lock" />
+                      <Lock />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -116,37 +131,10 @@ export default function LoginPage() {
                 }}
               />
 
-              {/* Forgot Password Link */}
-              <Box sx={{ textAlign: 'right', marginTop: 1 }}>
-                <Link to="/forgot-password" style={{ textDecoration: 'none', color: '#1976d2' }}>
-                  Forgot Password?
-                </Link>
-              </Box>
-
-              {/* Login Button */}
-              <Button type="submit" variant="contained" color="primary" fullWidth sx={{ padding: '12px', marginTop: 3, backgroundColor: '#7165EF', fontSize: '16px' , fontWeight: 'bold' }}>
+              <Button type="submit" variant="contained" color="primary" fullWidth sx={{ padding: '12px', marginTop: 3, backgroundColor: '#7165EF', fontSize: '16px', fontWeight: 'bold' }}>
                 Login
               </Button>
-
-              {/* Or Divider */}
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 2 }}>
-                <Typography variant="body2" color="textSecondary">
-                  or
-                </Typography>
-              </Box>
-
-              {/* Login with Email Link Button */}
-              <Button variant="outlined" fullWidth sx={{ marginTop: 2, borderColor: '#7165EF', color: '#7165EF' , fontWeight: 'bold' }}>
-                Login with Email Link
-              </Button>
             </form>
-
-            {/* Navigation */}
-            <Box sx={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)' }}>
-              <Button variant="outlined" color="secondary" href="/" sx={{ textTransform: 'none', borderColor: '#7165EF', color: '#7165EF' }}>
-                Home
-              </Button>
-            </Box>
           </CardContent>
         </Card>
       </Grid>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Button, Grid, Typography, styled } from '@mui/material';
 
-const FullWidthBox = styled(Box)({
+const HeroCard = styled(Box)({
     paddingBottom: 4,
   flexGrow: 1,
   padding: 4,
@@ -11,36 +11,48 @@ const FullWidthBox = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  boxSizing: 'border-box',
+ 
 });
 
 const HeroBanner = () => {
   return (
-    <FullWidthBox>
-      <Grid container spacing={2} alignItems="center">
+    <HeroCard>
+      <Grid container spacing={2} >
         <Grid item xs={12} md={6}>
-          <Typography variant="h2" gutterBottom>
+          <Typography variant="h2" alignItems="center">
             Welcome to Our Store
           </Typography>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" alignItems="center">
             Discover the best products at unbeatable products.
           </Typography>
-          <Button variant="contained" color="primary" sx={{ marginRight: 2 }}>
+         <Grid   sx={{ marginRight: 2 , marginTop: 5 }}>
+         <Button variant="outlined" >
             Shop Now
           </Button>
-          <Button variant="outlined" color="primary">
+          <Button variant="outlined"
+          sx={{ marginLeft: 2  ,
+            '&:hover': {
+              backgroundColor: 'lightwhite',
+            },
+          }}>
             Create Account
           </Button>
+         </Grid>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzcDujPahr6CKX16ckpadQFsW668f8N0ll6g&s" alt="Product 1" style={{ width: '30%', marginRight: '10px' }} />
-            <img src="https://cdn.thewirecutter.com/wp-content/media/2023/07/bluetoothheadphones-2048px-0876.jpg?auto=webp&quality=75&width=1024" alt="Product 2" style={{ width: '30%', marginRight: '10px' }} />
-            <img src="https://www.boat-lifestyle.com/cdn/shop/products/0cfa4417-0213-4b49-b78e-0ae68aeb7057_600x.png?v=1625046144" alt="Product 3" style={{ width: '30%' }} />
+          <Box
+           sx={{ display: 'flex', 
+           justifyContent: 'center',
+           alignItems: 'center' ,
+           '&:hover': { transform: 'scale(1.5)' },
+            transition: 'transform 0.5s ease',
+             }}>
+
+            <img src="https://www.boat-lifestyle.com/cdn/shop/products/0cfa4417-0213-4b49-b78e-0ae68aeb7057_600x.png?v=1625046144" alt="headphone" style={{ width: '60%' }} />
           </Box>
         </Grid>
       </Grid>
-    </FullWidthBox>
+    </HeroCard>
   );
 };
 

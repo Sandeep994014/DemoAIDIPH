@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import MenuAppBar from './MenuAppBar';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,11 +9,12 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
-      <Navbar />
-      <Box component="main" flexGrow={1}>
+      <Box position="fixed" width="100%">
+        <MenuAppBar />
+      </Box>
+      <Box component="main" flexGrow={1} mt={8}>
         {children}
       </Box>
-      {/* <Footer /> */}
     </Box>
   );
 };
