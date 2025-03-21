@@ -7,11 +7,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../auth/AuthContext';
+import jwt_decode from 'jwt-decode';
 import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
 
 const CartPage = () => {
   const { getCartTotal } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userId } = useAuth();
   const { favorites } = useFavorites(); 
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
@@ -64,10 +65,13 @@ const CartPage = () => {
     try {
       setLoadingPoints(true);
       const authToken = localStorage.getItem('authToken');
+      const decode = jwt_decode(authToken);
+      console.log(decode.user);
       if (!authToken) {
         throw new Error('No auth token found');
       }
       const response = await profileUser(authToken);
+      console.log("User Points:", response);
       setUserPoints(response.points);
     } catch (error) {
       console.log(error.response?.data?.message);
