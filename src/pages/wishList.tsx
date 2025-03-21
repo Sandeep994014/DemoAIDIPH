@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { getWishlist, toggleWishlist, getProductDetails } from '../services/auth';
+import { getWishlist, toggleWishlist,getProductDetails  } from '../services/auth';
 import { Card, CardContent, Typography, CardMedia, CardActions, Button, Grid, Box, IconButton } from '@mui/material';
 import { Link } from 'react-router-dom';
 import FavoriteIcon from '@mui/icons-material/Favorite'; 
-import { useAuth } from '../auth/AuthContext'; // Assuming this hook provides the auth data
 
 export default function WishList() {
-  const { isAuthenticated, userId, authToken } = useAuth(); // Get user data from context
+  const { isAuthenticated,userId, authToken } = useAuth(); 
   const [wishlist, setWishlist] = useState([]);
   const [wishlistStatus, setWishlistStatus] = useState(new Set()); 
-  const [productDetails, setProductDetails] = useState(null); // Store product details when fetched
 
   // Fetch the wishlist from the server
   const fetchWishlist = async () => {
+    const authToken = localStorage.getItem('authToken');
     if (authToken) {
       try {
         const data = await getWishlist(authToken);
@@ -29,8 +28,9 @@ export default function WishList() {
 
   useEffect(() => {
     fetchWishlist();
-  }, [authToken]);
+  }, []);
 
+  
   const handleToggleWishlist = async (product) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -45,20 +45,9 @@ export default function WishList() {
         }
         return updatedStatus;
       });
+
     } catch (error) {
       alert(error.response.data.message);
-    }
-  };
-
-  const handleGetProductDetails = async (productId) => {
-    try {
-      // Fetch product details using the getProductDetails API
-      const productDetails = await getProductDetails(productId, userId, authToken);
-      setProductDetails(productDetails);
-      console.log('Product Details:', productDetails);
-      // You can now use `productDetails` for displaying more information if required
-    } catch (error) {
-      console.error('Error fetching product details:', error);
     }
   };
 
@@ -108,15 +97,10 @@ export default function WishList() {
           ))}
         </Grid>
       ) : (
-        <Typography variant="h6" textAlign={'center'}>Your wishlist is empty</Typography>
-      )}
-
-      {/* Optionally, render the product details if fetched */}
-      {productDetails && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5">Product Details</Typography>
-          <pre>{JSON.stringify(productDetails, null, 2)}</pre>
-        </Box>
+        <>
+          <Typography variant="h6" textAlign={'center'}>Your wishlist is empty</Typography>
+          
+        </>
       )}
     </Box>
   );
