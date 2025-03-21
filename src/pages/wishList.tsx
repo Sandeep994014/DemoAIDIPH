@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { getWishlist, toggleWishlist,getProductDetails  } from '../services/auth';
+import { getWishlist, toggleWishlist } from '../services/auth';
 import { Card, CardContent, Typography, CardMedia, CardActions, Button, Grid, Box, IconButton } from '@mui/material';
 import { Link } from 'react-router-dom';
-import FavoriteIcon from '@mui/icons-material/Favorite'; 
+import FavoriteIcon from '@mui/icons-material/Favorite'; // Importing FavoriteIcon
 
 export default function WishList() {
-  const { isAuthenticated,userId, authToken } = useAuth(); 
   const [wishlist, setWishlist] = useState([]);
-  const [wishlistStatus, setWishlistStatus] = useState(new Set()); 
+  const [wishlistStatus, setWishlistStatus] = useState(new Set()); // Track the wishlist status of products
 
   // Fetch the wishlist from the server
   const fetchWishlist = async () => {
