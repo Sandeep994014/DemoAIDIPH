@@ -16,10 +16,9 @@ import { Badge } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useAuth } from '../auth/AuthContext';
 
 const pages = ['Home'];
-const settings = ['Profile', 'Logout'];
+const settings = ['Logout']; // Only "Logout" is in the settings array now.
 
 function ResponsiveAppBar() {
   const [SideBar, setSideBar] = React.useState(false);
@@ -32,6 +31,7 @@ function ResponsiveAppBar() {
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
+
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -41,13 +41,10 @@ function ResponsiveAppBar() {
   };
 
   const handleCloseUserMenu = (setting) => {
-    if (setting === 'Profile') {
-      navigate('/profile');
-    } else if (setting === 'Logout') {
-      // Clear the authentication tokens and redirect to login page
+    if (setting === 'Logout') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
-      navigate('/login'); // Navigate to the login page after logout
+      navigate('/login'); // Navigate to login page after logging out
     }
     setAnchorElUser(null);
   };
@@ -63,17 +60,22 @@ function ResponsiveAppBar() {
   const handleOpenWishlistPage = () => {
     navigate('/wishlist');
   };
-  
+
+  // Check if the authToken is present in localStorage
+  const isAuthenticated = Boolean(localStorage.getItem('authToken'));
+
+  // Conditionally render the AppBar when the user is authenticated
+  if (!isAuthenticated) {
+    return null; // If not authenticated, return nothing (you could also redirect or show a message)
+  }
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-         
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href=""
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -125,8 +127,6 @@ function ResponsiveAppBar() {
           <Typography
             variant="h5"
             noWrap
-            component="a"
-            href="/"
             sx={{
               mr: 2,
               justifyContent: 'center',
@@ -141,6 +141,8 @@ function ResponsiveAppBar() {
           >
             AIDIPH
           </Typography>
+          
+          {/* Conditionally render the Box only if the user is authenticated */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' , textAlign: 'center' } }}>
             {pages.map((page) => (
               <Button
@@ -148,9 +150,12 @@ function ResponsiveAppBar() {
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
+                {page}
               </Button>
             ))}
           </Box>
+
+          {/* Conditionally render Wishlist, Cart, and User Menu only if the user is authenticated */}
           <Box>
             <IconButton onClick={handleOpenWishlistPage} color='inherit'>
               <Badge badgeContent={favorites.length} color="secondary" sx={{ mr: 2 }}>
@@ -163,6 +168,8 @@ function ResponsiveAppBar() {
               </Badge>
             </IconButton>
           </Box>
+
+          {/* Conditionally render the User settings menu only if the user is authenticated */}
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -202,4 +209,5 @@ function ResponsiveAppBar() {
     </AppBar>
   );
 }
+
 export default ResponsiveAppBar;

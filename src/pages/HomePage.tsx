@@ -5,8 +5,10 @@ import FeatureProducts from '../pages/FeatureProducts';
 
 export default function HomePage() {
   return (
-    <Container>
-      <HeroBanner />
+    <Container fluid>
+     <Box my={1}>
+     <HeroBanner />
+      </Box>
       <Box my={4}>
         <FeatureProducts />
       </Box>

@@ -68,9 +68,6 @@ export default function History() {
                         <Typography variant="body2">
                           Points per Item: {item.point}
                         </Typography>
-                        {/* <Typography variant="body2">
-                          Total Points: {item.totalPoint}
-                        </Typography> */}
                       </CardContent>
                       <Box sx={{ display: 'flex', gap: 2, padding: 2 }}>
                         {item.imageUrls.map((image, index) => (

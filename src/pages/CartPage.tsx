@@ -5,7 +5,7 @@ import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { ShoppingCart as Cart } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
+import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService } from '../services/auth';
 
 const CartPage = () => {
   const { getCartTotal } = useCart();

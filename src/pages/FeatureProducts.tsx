@@ -1,147 +1,184 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Card, CardMedia, CardContent, Typography, Button, styled, IconButton, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
-import { ShoppingBag } from '@mui/icons-material';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import { useCart } from '../contexts/CartContext';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { getProducts, addToCart as addToCartService, toggleWishlist } from '../services/auth';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardMedia, Button, Typography, Grid, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import { getProducts, addToCart, toggleWishlist } from '../services/auth';  
+import { useAuth } from '../auth/AuthContext';
 
-const FeatureCard = styled(Card)({
-  height: 520,
-  maxWidth: 345,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  transition: 'transform 0.2s',
-  '&:hover': {
-    transform: 'scale(0.1',
-  },
-});
-
-const FeatureCardMedia = styled(CardMedia)({
-  height: 250,
-});
-
-const FeatureProducts = () => {
-  const { addToCart } = useCart();
-  const { addToFavorites } = useFavorites();
+export default function FeatureProducts() {
   const [products, setProducts] = useState([]);
-  const [selectedVariants, setSelectedVariants] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedSize, setSelectedSize] = useState({}); 
+  const [wishlist, setWishlist] = useState({});  // State to track wishlist status of products
+  const { userId, authToken } = useAuth(); 
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const token = localStorage.getItem("authToken");
-        // console.log("Making API call to fetch products...");
-        const data = await getProducts(1, 1, 10, token); 
-        // console.log("Product data fetched", data);
-        setProducts(data?.content);
+        const productsData = await getProducts(userId);
+        setProducts(Array.isArray(productsData?.content) ? productsData.content : []);
+        setError(null);
+        const initialSizeSelection = {};
+        productsData?.content.forEach((product) => {
+          const firstVariant = product.productVariants[0];
+          initialSizeSelection[product.id] = firstVariant; 
+        });
+        setSelectedSize(initialSizeSelection);
+        
+        // Initialize wishlist state with product IDs and their wishlist status
+        const initialWishlist = {};
+        productsData?.content.forEach((product) => {
+          initialWishlist[product.id] = product.isInWishlist || false;  // Assuming `isInWishlist` is provided in the API
+        });
+        setWishlist(initialWishlist);
+        
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          alert('Unauthorized access. Please log in again.');
-        } else {
-          alert('Failed to fetch products', error);
-        }
+        setError("Error fetching products. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, []);
+    if (userId) {
+      fetchProducts();
+    }
+  }, [userId]);
 
-  const handleVariantChange = (productId, variantId) => {
-    setSelectedVariants(prevState => ({
+  const handleSizeChange = (productId, size) => {
+    setSelectedSize(prevState => ({
       ...prevState,
-      [productId]: variantId
+      [productId]: size 
     }));
   };
 
-  const handleAddToCart = async (product) => {
+  const handleAddToCart = async (product, quantity) => {
+    if (!selectedSize[product.id]) {
+      setCartError("Please select a size before adding to cart.");
+      setCartSuccess("");  
+      return;
+    }
+  
     try {
-      const token = localStorage.getItem("authToken");
-      await addToCartService(product.id, 1, token);
-      addToCart(product);
+      const response = await addToCart(product.id, quantity, authToken);
+      setCartSuccess("Product added to cart successfully!");
+      setCartError("");  
+      alert(response.data.message);  
     } catch (error) {
-      alert(error.response.data.message);
+      setCartSuccess("");  
+      alert("Product added successfully"); 
     }
   };
 
-  const handleToggleWishlist = async (product) => {
+  const handleToggleWishlist = async (productId) => {
     try {
-      const token = localStorage.getItem("authToken");
-      await toggleWishlist(product.id, token);
-      addToFavorites(product);
+      const response = await toggleWishlist(productId, authToken);
+      setWishlist(prevState => ({
+        ...prevState,
+        [productId]: !prevState[productId],  // Toggle wishlist status
+      }));
+      alert(response.message);  // Show success message
     } catch (error) {
-      alert(error.response.data.message);
+      console.error('Error toggling wishlist:', error);
     }
   };
+
+  if (loading) {
+    return <Typography variant="h6" align="center">Loading products...</Typography>;
+  }
+
+  if (error) {
+    return <Typography variant="h6" color="error" align="center">{error}</Typography>;
+  }
+
+  if (products.length === 0) {
+    return <Typography variant="h6" align="center">No products available.</Typography>;
+  }
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" fontWeight={600} sx={{ mb: 4, textDecoration: 'underline' }}>Feature Products</Typography>
-      <Grid container spacing={4}>
-        {products.map(product => {
-          const selectedVariant = product.productVariants.find(variant => variant.id === selectedVariants[product.id]) || product.productVariants[0];
-          return (
-            <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
-              <FeatureCard>
-                <FeatureCardMedia
-                  image={selectedVariant.imageUrls[0]}
-                  title={product.name}
-                />
-                <CardContent sx={{ textAlign: 'start' }}>
-                  <Typography variant="h6" component="div" fontWeight={600}> <span>{product.brand}</span> {product.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">{product.description}</Typography>
-                  <Typography variant="body2" color="text.secondary" fontWeight={600}>Points: {product.point}</Typography>
+    <div>
+      <Typography textAlign={'center'} variant="h3" gutterBottom>
+        Featured Products
+      </Typography>
 
-                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                    {product.productVariants.map(variant => (
-                      <Button
-                        key={variant.id}
-                        variant="contained"
-                        sx={{
-                          backgroundColor: variant.color.toLowerCase(),
-                          minWidth: 30,
-                          height: 30,
-                          borderRadius: '50%',
-                          '&:hover': {
-                            backgroundColor: variant.color.toLowerCase(),
-                          }
-                        }}
-                        onClick={() => handleVariantChange(product.id, variant.id)}
-                      />
-                    ))}
-                  </Box>
-                  <FormControl fullWidth sx={{ mt: 2, mb: 2 }}>
-                    <InputLabel>Variant</InputLabel>
-                    <Select
-                      value={selectedVariant.id}
-                      onChange={(e) => handleVariantChange(product.id, e.target.value)}
-                      label="Variant"
-                    >
-                      {product.productVariants.map(variant => (
-                        <MenuItem key={variant.id} value={variant.id}>
-                          {variant.color} - {variant.size}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                  <IconButton aria-label="add to favorites" onClick={() => handleToggleWishlist(product)}>
-                    <FavoriteIcon />
-                  </IconButton>
-                  <Button variant="contained" color="primary" onClick={() => handleAddToCart(product)}>
-                    Add to Cart
-                    <ShoppingBag sx={{ fontSize: 18, ml: 1 }} />
-                  </Button>
+      <Grid container spacing={3}>
+        {products.map((product) => (
+          <Grid item xs={12} sm={6} md={4} key={product.id}>
+            <Card sx={{ maxWidth: 345 }}>
+              
+              <CardMedia
+                component="img"
+                height="260"
+                image={
+                  selectedSize[product.id]
+                    ? selectedSize[product.id]?.imageUrls[0]  
+                    : (product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : '/placeholder.jpg')  
+                }
+                alt={product.name}
+              />
+
+              <CardContent>
+                <Typography variant="h6" component="div">
+                  {product.name}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {product.brand}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {product.description}
+                </Typography>
+
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Typography variant="body2" color="text.primary">
+                    {product.point} Points
+                  </Typography>
                 </Box>
-              </FeatureCard>
-            </Grid>
-          );
-        })}
-      </Grid>
-    </Box>
-  );
-};
 
-export default FeatureProducts;
+                <FormControl fullWidth>
+                  <InputLabel>Size</InputLabel>
+                  <Select
+                    value={selectedSize[product.id]?.size || ''} 
+                    onChange={(e) => handleSizeChange(product.id, product.productVariants.find(variant => variant.size === e.target.value))} 
+                    label="Size"
+                  >
+                    {product.productVariants.map((variant) => (
+                      <MenuItem key={variant.id} value={variant.size}>
+                        {variant.size} - {variant.color}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </CardContent>
+
+              <Grid container spacing={2} sx={{ padding: 2 }}>
+                <Grid item xs={9}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleAddToCart(product, 1)} 
+                  >
+                    Add to Cart
+                  </Button>
+                </Grid>
+                <Grid item xs={3}>
+                <Button
+  fullWidth
+  variant="outlined"
+  color="secondary"
+  onClick={() => handleToggleWishlist(product.id)} 
+>
+  <BookmarkIcon sx={{ color: wishlist[product.id] ? "red" : "gray" }} />
+</Button>
+
+                </Grid>
+              </Grid>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </div>
+  );
+}

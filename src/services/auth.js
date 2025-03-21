@@ -1,6 +1,8 @@
 import axiosInstance from '../services/axios';
 import { toast } from 'react-toastify';
 
+
+//working fine
 export const login = async (payloadData) => {
   try {
     const response = await axiosInstance.post('/auth/login', payloadData, {
@@ -12,7 +14,6 @@ export const login = async (payloadData) => {
     if (response?.data?.accessToken) {
       localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('refreshToken', response.data.refreshToken);
-      // localStorage.setItem('user', JSON.stringify(response.data.user));
     }
     return response;
   } catch (error) {
@@ -22,18 +23,39 @@ export const login = async (payloadData) => {
   }
 };
 
-//feature products api
 export const getToken = () => {
   return localStorage.getItem('authToken');
 };
 
-export const getProducts = async (employeeId, page = 1, size = 10) => {
+export const getEmployeeData = async (employeeId) => {
   try {
     const authToken = getToken(); 
     if (!authToken) {
       throw new Error('No auth token found');
     }
-    const response = await axiosInstance.get(`/api/v1/reward-service/product?employeeId=${employeeId}&page=${page}&size=${size}`, {
+
+    const response = await axios.get(`/api/v1/reward-service/employee/${employeeId}`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      toast.error('Unauthorized access. Please log in again.');
+    }
+    throw error;
+  }
+};
+
+export const getProducts = async (userId, page = 1, size = 10) => {
+  try {
+    const authToken = getToken(); 
+    if (!authToken) {
+      throw new Error('No auth token found');
+    }
+    const response = await axiosInstance.get(`/api/v1/reward-service/product?employeeId=${userId}&page=${page}&size=${size}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -47,36 +69,19 @@ export const getProducts = async (employeeId, page = 1, size = 10) => {
   }
 };
 
-//cart added api -post
+
 export const addToCart = async (productId, quantity, authToken) => {
   const response = await axiosInstance.post(`/api/v1/reward-service/cart?productId=${productId}&quantity=${quantity}`, {
     headers: {
       'Authorization': `Bearer ${authToken}`
     },
   });
-
   if (!response.ok) {
     throw new Error('Failed to add product to cart');
   }
-
   return response.json();
 };
 
-
-//cart added api -get
-export const getCart = async (authToken) => {
-  const response = await axiosInstance.get('/api/v1/reward-service/cart', {
-    headers: {
-      'Authorization': `Bearer ${authToken}`
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to get cart');
-  }
-
-  return response.json();
-};
 
 export const fetchCart = async (authToken) => {
   try {
@@ -97,7 +102,7 @@ export const fetchCart = async (authToken) => {
 // update carts items quantity patch api
 export const updateQuantity = async (productId, quantity, authToken) => {
   try {
-    const response = await axiosInstance.patch(`/api/v1/reward-service/cart?productId=${productId}&quantity=${quantity}`, {
+    const response = await axiosInstance.patch(`/api/v1/reward-service/cart/update-quantity?productId=${productId}&quantityChange=${quantity}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -129,12 +134,13 @@ export const removeFromCart = async (productId, authToken) => {
   }
 };
 
-// get user profile api
-export const profileUser = async (authToken) => {
+// get user profile api by id
+
+export const profileUser = async (authToken, employeeId) => {
   try {
-    const response = await axiosInstance.get(`/api/v1/reward-service/employee/1`, {
+    const response = await axiosInstance.get(`/api/v1/reward-service/employee/${employeeId}`, {
       headers: {
-        'Authorization': `Bearer ${authToken}`
+        'Authorization': `Bearer ${authToken}`,
       }
     });
     return response.data;
@@ -143,7 +149,7 @@ export const profileUser = async (authToken) => {
       toast.error('Unauthorized access. Please log in again.');
     }
     throw error;
-  } 
+  }
 };
 
 // create address api -post
