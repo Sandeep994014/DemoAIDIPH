@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useCart } from '../contexts/CartContext';
+import { useCart, getEmployeeData } from '../contexts/CartContext';
 import { Box, Typography, Button, IconButton, Card, Stack, CircularProgress } from '@mui/material';
 import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { ShoppingCart as Cart } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../auth/AuthContext';
-import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService } from '../services/auth';
+import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
 
 const CartPage = () => {
   const { getCartTotal } = useCart();
   const { isAuthenticated } = useAuth();
+  const { favorites } = useFavorites(); 
+  const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
   const [cartTotal, setCartTotal] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
@@ -19,6 +23,7 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadingPoints, setLoadingPoints] = useState(true);
 
+  // Fetch cart items
   const cartItems = async () => {
     try {
       setLoading(true);
@@ -54,6 +59,7 @@ const CartPage = () => {
     setTotalProducts(cart.reduce((acc, product) => acc + product.quantity, 0));
   }, [cart]);
 
+  // Fetch user points
   const fetchUserPoints = async () => {
     try {
       setLoadingPoints(true);
@@ -64,7 +70,7 @@ const CartPage = () => {
       const response = await profileUser(authToken);
       setUserPoints(response.points);
     } catch (error) {
-      alert('Failed to load user points', error.response?.data?.message);
+      console.log(error.response?.data?.message);
     } finally {
       setLoadingPoints(false);
     }
@@ -74,16 +80,18 @@ const CartPage = () => {
     fetchUserPoints();
   }, []);
 
+  // Handle quantity update
   const handleUpdateQuantity = async (productId, quantity) => {
     try {
       const authToken = localStorage.getItem('authToken');
       await updateQuantityService(productId, quantity, authToken);
       setCart(prevCart => prevCart.map(product => product.id === productId ? { ...product, quantity } : product));
     } catch (error) {
-      alert('Failed to update product quantity');
+      alert(error.response.data.message);
     }
   };
 
+  // Handle remove from cart
   const handleRemoveFromCart = async (productId) => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -94,8 +102,7 @@ const CartPage = () => {
     }
   };
 
-  const totalAmount = cartTotal;
-
+  // Checkout handler
   const handleCheckout = () => {
     if (isAuthenticated) {
       if (totalPoints <= userPoints) {
@@ -105,6 +112,28 @@ const CartPage = () => {
       }
     }
   };
+
+  // Fetch user profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const authToken = localStorage.getItem('authToken');  // Get authToken from localStorage
+        if (!authToken) {
+          throw new Error('No auth token found');
+        }
+
+        const response = await profileUser(authToken); // Fetch the profile using the authToken
+        setProfile(response);  // Set the profile data from the response
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      }
+    };
+
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      fetchProfile();  // Call fetchProfile if authToken is found
+    }
+  }, []);  // Empty dependency array to run this effect only once
 
   if (loading) {
     return (
@@ -121,14 +150,33 @@ const CartPage = () => {
           <Cart className="h-12 w-12 text-blue-500" />
         </Box>
         <Typography variant="h4" sx={{ mb: 2 }}>Your cart is empty</Typography>
-        <Button variant="contained" color="primary" component={Link} to="/">Continue Shopping</Button>
+        <Button
+          variant=""
+          color="primary"
+          component={Link}
+          to="/"
+          sx={{ alignItems: 'left' }}
+        >
+          <ArrowBackIosIcon sx={{ mr: 1 }} />
+          Continue Shopping
+        </Button>
       </Box>
     );
   } else {
     return (
       <Box sx={{ padding: 4 }}>
-        <Typography variant="h4" gutterBottom>Shopping Cart</Typography>
-        <Typography variant="h6" gutterBottom>Items in Cart ({cart?.length})</Typography>
+        <Button
+          variant=""
+          color="primary"
+          component={Link}
+          to="/"
+          sx={{ alignItems: 'left' }}
+        >
+          <ArrowBackIosIcon sx={{ mr: 1 }} />
+          Continue Shopping
+        </Button>
+        <Typography variant="h4" gutterBottom textAlign={"center"}>Shopping Cart</Typography>
+        <Typography variant="h6" gutterBottom textAlign={"center"}>Items in Cart ({cart?.length})</Typography>
         <Stack direction="row" spacing={4}>
           <Box sx={{ flex: 2 }}>
             <Card sx={{ padding: 2 }}>
@@ -176,7 +224,7 @@ const CartPage = () => {
               <Stack spacing={2}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body1">Total Points</Typography>
-                  <Typography variant="body1">{userPoints}</Typography>
+                  <Typography variant="body1">{profile ? profile.points : 0}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body1">Total Products</Typography>
@@ -190,11 +238,6 @@ const CartPage = () => {
                   Checkout
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Box textAlign="center">
-                  <Link to="/" style={{ fontSize: "0.875rem", color: "#1976d2" }}>
-                    Continue Shopping
-                  </Link>
-                </Box>
               </Stack>
             </Card>
           </Box>

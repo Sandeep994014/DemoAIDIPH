@@ -65,7 +65,7 @@ export default function FeatureProducts() {
       setCartError("");  
       alert(response.data.message);  
     } catch (error) {
-      setCartSuccess("");  
+      // setCartSuccess("");  
       alert("Product added successfully"); 
     }
   };
@@ -77,7 +77,7 @@ export default function FeatureProducts() {
         ...prevState,
         [productId]: !prevState[productId],  // Toggle wishlist status
       }));
-      alert(response.message);  // Show success message
+      console.log(response.message);  // Show success message
     } catch (error) {
       console.error('Error toggling wishlist:', error);
     }

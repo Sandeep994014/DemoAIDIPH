@@ -1,7 +1,6 @@
 import axiosInstance from '../services/axios';
 import { toast } from 'react-toastify';
 
-
 //working fine
 export const login = async (payloadData) => {
   try {
@@ -311,3 +310,24 @@ export const getOrderHistory = async (authToken) => {
     throw error;
   }
 };  
+
+//product by id api -get
+export const getProductById = async (productId, employeeId, authToken) => {
+  try {
+    const response = await axios.get(
+      `/api/v1/reward-service/product/${productId}?employeeId=${employeeId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'accept': '*/*',
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      toast.error('Unauthorized access. Please log in again.');
+    }
+    throw error;
+  }
+};
