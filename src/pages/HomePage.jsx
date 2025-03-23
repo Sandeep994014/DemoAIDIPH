@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Box } from '@mui/material';
-import HeroBanner from '../pages/HeroBanner';
-import FeatureProducts from '../pages/FeatureProducts';
+import HeroBanner from './HeroBanner';
+import FeatureProducts from './FeatureProducts';
 
 export default function HomePage() {
   return (

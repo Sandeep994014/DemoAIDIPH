@@ -22,7 +22,6 @@ const Delivery = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
 
- 
   const fetchUserPoints = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -41,7 +40,6 @@ const Delivery = () => {
     fetchUserPoints();
   }, []);
 
- s
   const fetchAddresses = async () => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
@@ -49,7 +47,7 @@ const Delivery = () => {
     }
     try {
       const addressData = await getAddress(authToken);
-      console.log("address",addressData )
+      console.log("address", addressData);
       setAddresses(addressData);
     } catch (error) {
       console.error('Failed to fetch addresses', error);
@@ -60,7 +58,6 @@ const Delivery = () => {
     fetchAddresses();
   }, [navigate]);
 
-  
   const cartItems = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -99,7 +96,6 @@ const Delivery = () => {
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
-
   const handleEditClick = (address) => {
     setEditingAddress(address);
     setForm({
@@ -116,7 +112,6 @@ const Delivery = () => {
     setOpenEditDialog(false);
   };
 
-  
   const handleUpdateAddress = async () => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
@@ -142,7 +137,6 @@ const Delivery = () => {
     }
   };
 
-  
   const handleToggleDefault = async (addressId) => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
@@ -151,20 +145,19 @@ const Delivery = () => {
 
     try {
       const updatedAddresses = addresses.map((address) =>
-        address.id === addrssId
+        address.id === addressId
           ? { ...address, isDefault: !address.isDefault }
           : { ...address, isDefault: false }
       );
       setAddresses(updatedAddresses);
 
-      const updatedAddress = updatedAddresses.find((address) => address.id === id);
+      const updatedAddress = updatedAddresses.find((address) => address.id === addressId);
       await updateAddress(updatedAddress, authToken);
     } catch (error) {
       alert(error.response.data.message);
     }
   };
 
-  
   const handleCardClick = (selectedAddress) => {
     const updatedAddresses = addresses.map((address) =>
       address.id === selectedAddress.id
@@ -180,7 +173,6 @@ const Delivery = () => {
       updateAddress(updatedAddress, authToken);
     }
   };
-
 
   const handleCheckout = async () => {
     const authToken = localStorage.getItem('authToken');

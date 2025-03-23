@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export default function LoginPage() {
   };
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors = {};
     
     if (!email) {
       newErrors.email = 'Email is required';
@@ -33,7 +33,7 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -50,7 +50,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Error during login:", error);
-      const errorMessage = error?.response?.data?.message ;
+      const errorMessage = error?.response?.data?.message;
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);

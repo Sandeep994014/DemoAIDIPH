@@ -1,14 +1,10 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import MenuAppBar from './MenuAppBar';
-import { useAuth } from '../auth/AuthContext'; 
+import { useAuth } from '../auth/AuthContext';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();  
+const Layout = ({ children }) => {
+  const { isAuthenticated } = useAuth();
 
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh" overflow="hidden">

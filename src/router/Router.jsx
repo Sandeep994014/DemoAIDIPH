@@ -12,11 +12,10 @@ import NotFound from '../pages/NotFound';
 import { useAuth } from '../auth/AuthContext'; // Ensure useAuth is imported
 import Address from '../pages/Address';
 
-// RequireAuth component for protecting private routes
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
 
-  // Handle the case where authentication status changes
+  
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
@@ -38,9 +37,9 @@ function Router() {
           <Route path="/delivery" element={<RequireAuth><Delivery /></RequireAuth>} />
           <Route path="/wishlist" element={<RequireAuth><WishList /></RequireAuth>} />
           <Route path="/order-history" element={<RequireAuth><History /></RequireAuth>} />
-          <Route path="/address" element={<RequireAuth><Address/></RequireAuth>} />
+          <Route path="/address" element={<RequireAuth><Address /></RequireAuth>} />
 
-          {/* Catch-all for non-existent routes */}
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

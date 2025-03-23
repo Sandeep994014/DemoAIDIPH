@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCart, getEmployeeData } from '../contexts/CartContext';
+import { useCart } from '../contexts/CartContext';
 import { Box, Typography, Button, IconButton, Card, Stack, CircularProgress } from '@mui/material';
 import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { ShoppingCart as Cart } from 'lucide-react';
