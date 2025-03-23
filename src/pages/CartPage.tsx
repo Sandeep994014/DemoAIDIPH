@@ -20,7 +20,7 @@ const CartPage = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [cart, setCart] = useState([]);
-  const [userPoints, setUserPoints] = useState(0);
+  const [userPoints, setUserPoints] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingPoints, setLoadingPoints] = useState(true);
 
@@ -70,8 +70,8 @@ const CartPage = () => {
       if (!authToken) {
         throw new Error('No auth token found');
       }
-      const response = await profileUser(authToken);
-      console.log("User Points:", response);
+      const response = await profileUser(authToken, userId);
+      console.log("User Points:", response.points);
       setUserPoints(response.points);
     } catch (error) {
       console.log(error.response?.data?.message);
@@ -106,6 +106,7 @@ const CartPage = () => {
     }
   };
 
+ 
   // Checkout handler
   const handleCheckout = () => {
     if (isAuthenticated) {
@@ -125,11 +126,11 @@ const CartPage = () => {
         if (!authToken) {
           throw new Error('No auth token found');
         }
-
         const response = await profileUser(authToken); // Fetch the profile using the authToken
+       
         setProfile(response);  // Set the profile data from the response
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
+        
       }
     };
 
@@ -228,7 +229,7 @@ const CartPage = () => {
               <Stack spacing={2}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body1">Total Points</Typography>
-                  <Typography variant="body1">{profile ? profile.points : 0}</Typography>
+                  <Typography variant="body1">{userPoints}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body1">Total Products</Typography>

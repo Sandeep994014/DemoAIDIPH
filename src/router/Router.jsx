@@ -1,5 +1,5 @@
 // src/router/Router.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import HomePage from '../pages/HomePage';
@@ -10,13 +10,17 @@ import WishList from '../pages/WishList';
 import History from '../pages/History';
 import NotFound from '../pages/NotFound';
 import { useAuth } from '../auth/AuthContext'; // Ensure useAuth is imported
+import Address from '../pages/Address';
 
 // RequireAuth component for protecting private routes
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
+
+  // Handle the case where authentication status changes
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
+
   return children;
 }
 
@@ -34,6 +38,7 @@ function Router() {
           <Route path="/delivery" element={<RequireAuth><Delivery /></RequireAuth>} />
           <Route path="/wishlist" element={<RequireAuth><WishList /></RequireAuth>} />
           <Route path="/order-history" element={<RequireAuth><History /></RequireAuth>} />
+          <Route path="/address" element={<RequireAuth><Address/></RequireAuth>} />
 
           {/* Catch-all for non-existent routes */}
           <Route path="*" element={<NotFound />} />

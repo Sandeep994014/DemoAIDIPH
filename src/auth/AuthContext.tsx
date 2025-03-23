@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import jwt_decode from 'jwt-decode';  // Correct import of jwt_decode
+import jwt_decode from 'jwt-decode'; 
+import { getEmployeeData } from "../services/auth"; 
+
 
 const AuthContext = React.createContext();
 
@@ -13,6 +15,7 @@ function AuthProvider({ children }) {
   const [userId, setUserId] = useState(null);
   const [role, setRole] = useState(null);
   const [permissions, setPermissions] = useState([]);
+  const [userPoints, setUserPoints] = useState(null);  
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -20,25 +23,41 @@ function AuthProvider({ children }) {
       setAuthToken(token);
       setIsAuthenticated(true);
 
-      // Decode the token and extract necessary fields
-      const decodedToken = jwt_decode(token);  // Decode the token
+     
+      const decodedToken = jwt_decode(token); 
       const extractedUserId = decodedToken.userId;
       const extractedRole = decodedToken.role;
       const extractedPermissions = decodedToken.permissions;
+      const extractedUserPoints = decodedToken.userPoints;
 
       setUserId(extractedUserId);
       setRole(extractedRole);
       setPermissions(extractedPermissions);
+      
+
+     
+      fetchUserPointsFromAPI(extractedUserId, token);
     }
   }, []);
+
+  // Fetch points from the API
+  const fetchUserPointsFromAPI = async (userId, authToken) => {
+    try {
+      const points = await getEmployeeData(userId, authToken);
+      setUserPoints(points);  
+    } catch (error) {
+      console.error("Failed to fetch user points:", error);
+      setUserPoints(0);  
+    }
+  };
 
   const login = token => {
     localStorage.setItem("authToken", token);
     setAuthToken(token);
     setIsAuthenticated(true);
 
-    // Decode the token and extract necessary fields on login
-    const decodedToken = jwt_decode(token);  // Decode the token
+
+    const decodedToken = jwt_decode(token);  
     const extractedUserId = decodedToken.userId;
     const extractedRole = decodedToken.role;
     const extractedPermissions = decodedToken.permissions;
@@ -46,15 +65,19 @@ function AuthProvider({ children }) {
     setUserId(extractedUserId);
     setRole(extractedRole);
     setPermissions(extractedPermissions);
+
+    // Fetch the user points after login
+    fetchUserPointsFromAPI(extractedUserId, token);
   };
 
   const logout = () => {
     localStorage.removeItem("authToken");
     setAuthToken(null);
     setIsAuthenticated(false);
-    setUserId(null);  // Clear userId on logout
-    setRole(null);  // Clear role on logout
-    setPermissions([]);  // Clear permissions on logout
+    setUserId(null); 
+    setRole(null); 
+    setPermissions([]); 
+    setUserPoints(null); 
   };
 
   return (
@@ -65,6 +88,7 @@ function AuthProvider({ children }) {
         userId,
         role,
         permissions,
+        userPoints,  
         login,
         logout
       }}

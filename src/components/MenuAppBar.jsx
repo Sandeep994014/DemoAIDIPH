@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 
-const pages = ['Home'];
+const pages = [''];
 const settings = ['Logout']; // Only "Logout" is in the settings array now.
 
 function ResponsiveAppBar() {

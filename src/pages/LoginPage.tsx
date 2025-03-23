@@ -46,11 +46,11 @@ export default function LoginPage() {
       if (response?.status === 201) {
         navigate('/');
       } else {
-        alert('Login failed. Please try again.');
+        alert(error?.response?.data?.message);
       }
     } catch (error) {
       console.error("Error during login:", error);
-      const errorMessage = error?.response?.data?.message || 'Something went wrong, please try again later.';
+      const errorMessage = error?.response?.data?.message ;
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);

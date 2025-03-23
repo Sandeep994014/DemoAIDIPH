@@ -105,7 +105,6 @@ export default function FeatureProducts() {
         {products.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={product.id}>
             <Card sx={{ maxWidth: 345 }}>
-              
               <CardMedia
                 component="img"
                 height="260"
@@ -164,15 +163,14 @@ export default function FeatureProducts() {
                   </Button>
                 </Grid>
                 <Grid item xs={3}>
-                <Button
-  fullWidth
-  variant="outlined"
-  color="secondary"
-  onClick={() => handleToggleWishlist(product.id)} 
->
-  <BookmarkIcon sx={{ color: wishlist[product.id] ? "red" : "gray" }} />
-</Button>
-
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => handleToggleWishlist(product.id)} 
+                  >
+                    <BookmarkIcon sx={{ color: wishlist[product.id] ? "red" : "gray" }} />
+                  </Button>
                 </Grid>
               </Grid>
             </Card>

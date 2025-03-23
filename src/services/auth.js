@@ -186,10 +186,11 @@ export const getAddress = async (authToken) => {
   }
 };
 
-// update address api -patch
-export const updateAddress = async (addressData, authToken) => {
+// update address by id api -patch
+// Update address by ID - PATCH
+export const updateAddress = async (addressData, authToken, id) => {
   try {
-    const response = await axiosInstance.patch('/api/v1/reward-service/address/1', addressData, {
+    const response = await axiosInstance.patch(`/api/v1/reward-service/address/1`, addressData, {
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json'

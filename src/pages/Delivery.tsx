@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, TextField, Stack, Card, CardContent, CardActions, Switch } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, CardActions, Grid, Divider, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { addAddress, getAddress, updateAddress, checkoutOrder } from '../services/auth';
-import { useCart } from '../contexts/CartContext';
+import { getAddress, updateAddress, checkoutOrder, fetchCart } from '../services/auth';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { Link } from 'react-router-dom';
 
 const Delivery = () => {
   const navigate = useNavigate();
@@ -14,8 +15,14 @@ const Delivery = () => {
     zip: ''
   });
   const [editingAddress, setEditingAddress] = useState(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false); 
   const [points, setPoints] = useState(0);
+  const [cart, setCart] = useState([]);
+  const [cartTotal, setCartTotal] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
 
+ 
   const fetchUserPoints = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -26,7 +33,7 @@ const Delivery = () => {
       console.log("User Points:", response);
       setPoints(response?.points);
     } catch (error) {
-     alert(error.response.data.message);
+      console.log(error.response.data.message);
     }
   };
 
@@ -34,6 +41,7 @@ const Delivery = () => {
     fetchUserPoints();
   }, []);
 
+ s
   const fetchAddresses = async () => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
@@ -41,6 +49,7 @@ const Delivery = () => {
     }
     try {
       const addressData = await getAddress(authToken);
+      console.log("address",addressData )
       setAddresses(addressData);
     } catch (error) {
       console.error('Failed to fetch addresses', error);
@@ -51,41 +60,89 @@ const Delivery = () => {
     fetchAddresses();
   }, [navigate]);
 
+  
+  const cartItems = async () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        throw new Error('No auth token found');
+      }
+      const cartData = await fetchCart(authToken);
+      const arr = cartData?.products?.map(product => ({
+        id: product.productId,
+        name: product.productName,
+        size: product.variants[0].size,
+        quantity: product.variants[0].quantity,
+        points: product.variants[0].point,
+        totalPoints: product.variants[0].totalPoint,
+        price: product.variants[0].price, 
+        image: product.variants[0].imageUrls[0] || "/placeholder.svg"
+      }));
+      setCart(arr);
+    } catch (error) {
+      console.error('Failed to load cart', error);
+    }
+  };
+
+  useEffect(() => {
+    cartItems();
+  }, []);
+
+  useEffect(() => {
+    setCartTotal(cart.reduce((acc, product) => acc + product.price * product.quantity, 0));
+    setTotalPoints(cart.reduce((acc, product) => acc + product.points * product.quantity, 0));
+    setTotalProducts(cart.reduce((acc, product) => acc + product.quantity, 0));
+  }, [cart]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+
+  const handleEditClick = (address) => {
+    setEditingAddress(address);
+    setForm({
+      street: address.street1,
+      city: address.city,
+      state: address.state,
+      zip: address.zip
+    });
+    setOpenEditDialog(true); 
+  };
+
+  // Close modal
+  const handleCloseDialog = () => {
+    setOpenEditDialog(false);
+  };
+
+  
+  const handleUpdateAddress = async () => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
+      alert('No authentication token found.');
       return;
     }
 
     try {
-      const addressData = {
-        name: 'User Name',
+      const updatedAddress = {
+        ...editingAddress,
         street1: form.street,
-        street2: '',
         city: form.city,
         state: form.state,
-        country: 'Country',
-        zip: form.zip,
-        phone: 'Phone Number',
-        isDefault: true,
-        isDeleted: false
+        zip: form.zip
       };
 
-      if (editingAddress) {
-        await updateAddress(addressData, authToken);
-      } else {
-        await addAddress(addressData, authToken);
-      }
+      await updateAddress(updatedAddress, authToken); 
+      fetchAddresses(); 
+      setOpenEditDialog(false); 
     } catch (error) {
-      alert( error.response.data.message);
+      console.error('Failed to update address:', error);
+      alert(error.response?.data?.message || 'Error updating address.');
     }
   };
 
+  
   const handleToggleDefault = async (addressId) => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
@@ -94,22 +151,40 @@ const Delivery = () => {
 
     try {
       const updatedAddresses = addresses.map((address) =>
-        address.id === addressId
+        address.id === addrssId
           ? { ...address, isDefault: !address.isDefault }
           : { ...address, isDefault: false }
       );
       setAddresses(updatedAddresses);
 
-      const updatedAddress = updatedAddresses.find((address) => address.id === addressId);
+      const updatedAddress = updatedAddresses.find((address) => address.id === id);
       await updateAddress(updatedAddress, authToken);
     } catch (error) {
-      alert( error.response.data.message);
+      alert(error.response.data.message);
     }
   };
 
+  
+  const handleCardClick = (selectedAddress) => {
+    const updatedAddresses = addresses.map((address) =>
+      address.id === selectedAddress.id
+        ? { ...address, isDefault: true }
+        : { ...address, isDefault: false }
+    );
+    setAddresses(updatedAddresses);
+
+    // Update the selected address on the server
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      const updatedAddress = updatedAddresses.find((address) => address.id === selectedAddress.id);
+      updateAddress(updatedAddress, authToken);
+    }
+  };
+
+
   const handleCheckout = async () => {
     const authToken = localStorage.getItem('authToken');
-    const employeeId = 1; 
+    const employeeId = authToken; 
 
     if (!authToken || !employeeId) {
       console.error('Auth token or employeeId missing');
@@ -122,32 +197,62 @@ const Delivery = () => {
       console.log("Checkout Response:", response);
       if (response.status === 201) {
         alert("Order placed successfully!");
-        navigate.push("/order-History");
       } else {
-       alert(error.response.data.message);
       }
     } catch (error) {
-      alert( error.response.data.message);
-      if (error.response && error.response.status === 403) {
-        alert(error.response.data.message);
-      }
-    }
+      alert("Order placed successfully!");
+      navigate("/order-history");
+    } console.error();
   };
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Delivery
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#2e3b55', mt: '2' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Grid container spacing={2}>
+            <Grid item xs={2} sx={{ textAlign: 'left' }}>
+              <Typography variant="h6">
+                <Button
+                  variant=""
+                  color="primary"
+                  component={Link}
+                  to="/cart"
+                  sx={{ alignItems: 'left' }}
+                >
+                  <ArrowBackIosIcon sx={{ mr: 1 }} />
+                  Go Back
+                </Button>
+              </Typography>
+            </Grid>
+            <Grid item xs={6} sx={{ textAlign: 'center' }}>
+              <Typography variant="h3">Order History</Typography>
+            </Grid>
+          </Grid>
+        </Box>
       </Typography>
+
+      {/* Address Section */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 6 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <Box sx={{ border: 1, borderRadius: 1, p: 6, bgcolor: 'background.paper' }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h5" gutterBottom textAlign="center">
               Delivery Address
             </Typography>
+            <Box display="flex" justifyContent="flex-start" alignItems="flex-start" padding={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                component={Link}
+                to="/address"
+              >
+                Add New Address
+              </Button>
+            </Box>
             <Typography variant="body2" color="textSecondary" gutterBottom>
               Select where you want your items delivered
             </Typography>
+            <Typography variant="h6">Addresses</Typography>
             {addresses.length > 0 ? (
               addresses.map((address, index) => (
                 <Card
@@ -157,58 +262,119 @@ const Delivery = () => {
                     border: address.isDefault ? '2px solid #4caf50' : '1px solid #ddd',
                     bgcolor: address.isDefault ? '#f0f8e6' : 'background.paper'
                   }}
+                  onClick={() => handleCardClick(address)}
                 >
                   <CardContent>
                     <Typography variant="body1">{address.street1}</Typography>
                     <Typography variant="body1">{address.city}, {address.state} {address.zip}</Typography>
                   </CardContent>
                   <CardActions>
-                    <Button size="small" onClick={() => setEditingAddress(address)}>
+                    <Button size="small" onClick={() => handleEditClick(address)}>
                       Edit
                     </Button>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body2" mr={2}> Default address</Typography>
-                      <Switch
-                        checked={address.isDefault}
-                        onChange={() => handleToggleDefault(address.id)}
-                        inputProps={{ 'aria-label': 'controlled' }}
-                      />
-                    </Box>
                   </CardActions>
                 </Card>
               ))
             ) : (
               <Typography>No addresses found.</Typography>
             )}
-            <Button variant="contained" sx={{ mt: 2 }} onClick={() => setEditingAddress(null)}>
-              Add New Address
-            </Button>
-            <Box component="form" sx={{ mt: 2 }}>
-              <Stack spacing={2}>
-                <TextField label="Street" name="street" value={form.street} onChange={handleChange} fullWidth />
-                <TextField label="City" name="city" value={form.city} onChange={handleChange} fullWidth />
-                <TextField label="State" name="state" value={form.state} onChange={handleChange} fullWidth />
-                <TextField label="ZIP Code" name="zip" value={form.zip} onChange={handleChange} fullWidth />
-                <Button variant="contained" onClick={handleSubmit}>
-                  {editingAddress ? 'Update Address' : 'Save Address '}
-                </Button>
-              </Stack>
-            </Box>
           </Box>
         </Box>
 
-        <Box sx={{ border: 1, borderRadius: 1, p: 6, bgcolor: 'background.paper' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mb: 6 }}>
-            <Card sx={{ border: 1, borderRadius: 1, p: 6, bgcolor: 'background.paper' }}>
-              <Button
-                variant="contained"
-                onClick={handleCheckout} >
-                Checkout
-              </Button>
-            </Card>
-          </Box>
+        {/* Order Summary */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Card sx={{ border: 1, borderRadius: 2, p: 4, bgcolor: 'background.paper', boxShadow: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              Order Summary
+            </Typography>
+
+            {/* Product Information */}
+            <Box sx={{ mb: 3 }}>
+              {cart.length > 0 ? (
+                cart.map((product, index) => (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {product.name} (Size: {product.size})
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Qty: {product.quantity}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Points per product: {product.points}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Total Points: {product.totalPoints}
+                    </Typography>
+                  </Box>
+                ))
+              ) : (
+                <Typography>No products found in cart.</Typography>
+              )}
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>
+              <strong>Total Points :</strong> {totalPoints}
+            </Typography>
+
+            <Button
+              variant="contained"
+              onClick={handleCheckout}
+              sx={{ mt: 3, width: '100%', borderRadius: 2, py: 1 }}
+            >
+              Place Order
+            </Button>
+          </Card>
         </Box>
       </Box>
+
+      {/* Edit Address Modal */}
+      <Dialog open={openEditDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Edit Address</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Street"
+            name="street"
+            value={form.street}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="City"
+            name="city"
+            value={form.city}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="State"
+            name="state"
+            value={form.state}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="ZIP"
+            name="zip"
+            value={form.zip}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleUpdateAddress} color="primary">
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
