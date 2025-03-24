@@ -18,15 +18,13 @@ import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 
 const pages = [''];
-const settings = ['Logout']; 
+const settings = ['Logout'];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const { cart, updateQuantity } = useCart('');
-  console.log("useCart", cart);
+  const { cart, getCartCount } = useCart();
   const { favorites, getFavoritesCount } = useFavorites();
-  console.log("useFavorites", favorites);
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
@@ -53,16 +51,15 @@ function ResponsiveAppBar() {
   const handleOpenCartPage = () => {
     navigate('/cart');
   };
-  
+
   const handleOpenWishlistPage = () => {
     navigate('/wishlist');
   };
 
-
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
 
   if (!isAuthenticated) {
-    return null; 
+    return null;
   }
 
   return (
@@ -119,7 +116,7 @@ function ResponsiveAppBar() {
               ))}
             </Menu>
           </Box>
-          
+
           <Typography
             variant="h5"
             noWrap
@@ -137,9 +134,8 @@ function ResponsiveAppBar() {
           >
             AIDIPH
           </Typography>
-          
-          
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' , textAlign: 'center' } }}>
+
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex', textAlign: 'center' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
@@ -151,15 +147,14 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          
           <Box>
             <IconButton onClick={handleOpenWishlistPage} color='inherit'>
-              <Badge badgeContent={favorites.length} color="secondary" sx={{ mr: 2 }}>
+              <Badge badgeContent={getFavoritesCount()} color="secondary" sx={{ mr: 2 }}>
                 <Favorite />
               </Badge>
             </IconButton>
             <IconButton onClick={handleOpenCartPage} color='inherit'>
-              <Badge badgeContent={cart.length} color="secondary" sx={{ mr: 2 }}>
+              <Badge badgeContent={getCartCount()} color="secondary" sx={{ mr: 2 }}>
                 <ShoppingCart />
               </Badge>
             </IconButton>
@@ -190,7 +185,7 @@ function ResponsiveAppBar() {
               {settings.map((setting) => (
                 <MenuItem
                   key={setting}
-                  onClick={() => handleCloseUserMenu(setting)} 
+                  onClick={() => handleCloseUserMenu(setting)}
                 >
                   <Typography sx={{ textAlign: 'center' }}>
                     {setting}

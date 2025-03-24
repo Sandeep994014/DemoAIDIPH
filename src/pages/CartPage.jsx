@@ -11,9 +11,9 @@ import jwt_decode from 'jwt-decode';
 import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
 
 const CartPage = () => {
-  const { getCartTotal,updateQuantity } = useCart();
+  const { getCartTotal } = useCart();
   const { isAuthenticated, userId } = useAuth();
-  const { favorites } = useFavorites(); 
+  const { favorites } = useFavorites();
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
   const [cartTotal, setCartTotal] = useState(0);
@@ -23,7 +23,7 @@ const CartPage = () => {
   const [userPoints, setUserPoints] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingPoints, setLoadingPoints] = useState(true);
-  
+
   // Fetch cart items
   const cartItems = async () => {
     try {
@@ -58,9 +58,9 @@ const CartPage = () => {
     setCartTotal(getCartTotal());
     setTotalPoints(cart.reduce((acc, product) => acc + product.points * product.quantity, 0));
     setTotalProducts(cart.reduce((acc, product) => acc + product.quantity, 0));
-  }, [cart]);
+  }, [cart, getCartTotal]);
 
-  // Fetch user points
+  // Fetch user points 
   const fetchUserPoints = async () => {
     try {
       setLoadingPoints(true);
@@ -123,7 +123,7 @@ const CartPage = () => {
         if (!authToken) {
           throw new Error('No auth token found');
         }
-        const response = await profileUser(authToken);
+        const response = await profileUser(authToken , userId);
         setProfile(response);
       } catch (error) {}
     };

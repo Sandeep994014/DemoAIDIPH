@@ -4,39 +4,38 @@ import { Card, CardContent, Typography, CardMedia, CardActions, Button, Grid, Bo
 import { Link } from 'react-router-dom';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 export default function WishList() {
+  const { favorites, addToFavorites, removeFromFavorites, getFavoritesCount } = useFavorites();
   const [wishlist, setWishlist] = useState([]);
-  const [wishlistStatus, setWishlistStatus] = useState(new Set()); 
-  const [selectedProduct, setSelectedProduct] = useState(null); 
-  const [openDialog, setOpenDialog] = useState(false); 
-  const [favorites, setFavorites] = useState([]);
+  const [wishlistStatus, setWishlistStatus] = useState(new Set());
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
-  // Fetch wishlist from the backend
+  // Fetch wishlist and sync with context
   const fetchWishlist = async () => {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
       try {
         const data = await getWishlist(authToken);
-        console.log("Wishlist Data:", data);
         setWishlist(data);
-  
-        const productIds = new Set(data.map(product => product.productId));
-        // console.log("Wishlist Status:", productIds);
-        setFavorites(productIds.size);  
-        setWishlistStatus(productIds); 
+
+        // Sync context
+        setWishlistStatus(new Set(data.map(product => product.productId)));
+        data.forEach(product => {
+          addToFavorites({ id: product.productId, ...product });
+        });
       } catch (error) {
         alert(error.response?.data?.message || 'Error fetching wishlist');
       }
     }
   };
-  
 
   useEffect(() => {
     fetchWishlist();
   }, []);
 
-  
   const handleToggleWishlist = async (product) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -45,10 +44,15 @@ export default function WishList() {
         return;
       }
 
-      
       await toggleWishlist(product.productId, token);
 
-    
+      // Optimistically toggle locally
+      if (wishlistStatus.has(product.productId)) {
+        removeFromFavorites(product.productId);
+      } else {
+        addToFavorites({ id: product.productId, ...product });
+      }
+
       fetchWishlist();
 
     } catch (error) {
@@ -56,19 +60,17 @@ export default function WishList() {
     }
   };
 
-  // Function to fetch product details when a user clicks on a product
   const handleProductClick = async (productId) => {
     try {
       const token = localStorage.getItem('authToken');
-      const productDetails = await getProductById(productId, null, token); 
-      setSelectedProduct(productDetails); 
-      setOpenDialog(true); 
+      const productDetails = await getProductById(productId, null, token);
+      setSelectedProduct(productDetails);
+      setOpenDialog(true);
     } catch (error) {
-      console.log(error.response?.data?.message );
+      console.log(error.response?.data?.message);
     }
   };
 
-  // Close the dialog
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedProduct(null);
@@ -76,32 +78,28 @@ export default function WishList() {
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Button
-  variant=""
-  color="primary"
-  component={Link}
-  to="/"
-  sx={{  alignItems: 'left' }}
->
-  <ArrowBackIosIcon sx={{ mr: 1 }} />
-  Continue Shopping
-</Button>
-
+      <Button variant="" color="primary" component={Link} to="/">
+        <ArrowBackIosIcon sx={{ mr: 1 }} />
+        Continue Shopping
+      </Button>
 
       <Typography variant="h4" textAlign={'center'} fontWeight={600} sx={{ mb: 4, textDecoration: 'underline' }}>
         My Wishlist
       </Typography>
-      <Typography variant="h6" gutterBottom textAlign={"center"} > Items in Cart ({favorites})</Typography>
+
+      <Typography variant="h6" gutterBottom textAlign={"center"}>
+        Items in Wishlist ({getFavoritesCount()})
+      </Typography>
 
       {wishlist.length > 0 ? (
         <Grid container spacing={4} mt={3}>
           {wishlist.map((product) => (
-            <Grid item key={product.productId} xs={12} sm={6} md={4} lg={3}>
+            <Grid item key={product.productId} xs={12} sm={6} md={4} lg={3} mt={3}>
               <Card sx={{ maxWidth: 345 }} onClick={() => handleProductClick(product.productId)}>
                 <CardMedia
                   component="img"
                   height="140"
-                  image={product.imageUrls[0]}  // Assuming the imageUrls is an array
+                  image={product.imageUrls[0]}
                   alt={product.name}
                 />
                 <CardContent>
@@ -116,12 +114,12 @@ export default function WishList() {
                 <CardActions>
                   <IconButton
                     aria-label="toggle wishlist"
-                    onClick={(e) => { 
-                      e.stopPropagation();  // Prevent the click from triggering the product detail dialog
-                      handleToggleWishlist(product);  // Toggle wishlist status for this product
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleWishlist(product);
                     }}
                     sx={{
-                      color: wishlistStatus.has(product.productId) ? 'red' : 'gray',  // Red if in wishlist, gray otherwise
+                      color: wishlistStatus.has(product.productId) ? 'red' : 'gray',
                     }}
                   >
                     <FavoriteIcon />
@@ -135,7 +133,7 @@ export default function WishList() {
         <Typography variant="h6" textAlign={'center'}>Your wishlist is empty</Typography>
       )}
 
-      {/* Dialog to show product details */}
+      {/* Product Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>{selectedProduct ? selectedProduct.name : ''}</DialogTitle>
         <DialogContent>

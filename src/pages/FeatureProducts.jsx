@@ -172,11 +172,11 @@ export default function FeatureProducts() {
                 <Grid item xs={3}>
                   <Button
                     fullWidth
-                    variant="outlined"
+                    variant=""
                     color="secondary"
                     onClick={() => handleToggleWishlist(product.id)} 
                   >
-                    <Favorite color={product.isWishlisted === true ? "error" : "primary"} />
+                    <Favorite sx={{fontSize: 30}} color={product.isWishlisted === true ? "error" : "primary"} />
                   </Button>
                 </Grid>
               </Grid>

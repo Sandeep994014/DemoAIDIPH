@@ -187,14 +187,15 @@ const Delivery = () => {
     try {
       const response = await checkoutOrder(employeeId, authToken);
       console.log("Checkout Response:", response);
-      if (response.status === 201) {
+      if (response.message === 'Order placed successfully.') {
         alert("Order placed successfully!");
+        navigate("/order-history");
       } else {
+        alert(response?.data?.message);
       }
     } catch (error) {
-      alert("Order placed successfully!");
-      navigate("/order-history");
-    } console.error();
+      alert(error?.response?.data?.message);
+    }
   };
 
   return (
