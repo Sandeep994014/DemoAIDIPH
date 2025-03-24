@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Card, CardContent, Divider, Avatar, styled, Button } from '@mui/material';
-import { profileUser } from '../services/auth';  // Assuming you have a service for the API call
-import { useNavigate } from 'react-router-dom';  // Import react-router-dom
-import { useAuth } from '../auth/AuthContext';  // Importing useAuth to get user info
+import { profileUser } from '../services/auth';  
+import { useNavigate } from 'react-router-dom';  
+import { useAuth } from '../auth/AuthContext';  
 
-// Styled components
+
 const HeroCard = styled(Box)(() => ({
   padding: '20px',
   backgroundColor: '#f5f5f5',
@@ -23,7 +23,7 @@ const LeftCard = styled(Card)(() => ({
   backgroundColor: '#ffffff',
   boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
   borderRadius: '8px',
-  marginRight: '20px', // Space between left card and right card
+  marginRight: '20px', 
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
@@ -39,7 +39,7 @@ const AvatarStyled = styled(Avatar)(() => ({
   marginBottom: '10px',
 }));
 
-// Style the buttons to look more like e-commerce buttons
+
 const ButtonContainer = styled(Box)(() => ({
   marginTop: '20px',
   display: 'flex',
@@ -55,7 +55,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: '8px',
   transition: 'background-color 0.3s ease',
   '&:hover': {
-    backgroundColor: theme.palette.primary.dark, // Darken primary color on hover
+    backgroundColor: theme.palette.primary.dark, 
     color: 'white',
   },
   '&.MuiButton-outlined': {
@@ -69,14 +69,14 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 const HeroBanner = () => {
-  const [profile, setProfile] = useState(null);  // State for profile data
-  const { userId, authToken } = useAuth();  // Get userId and authToken from context
-  const navigate = useNavigate();  // For navigation
+  const [profile, setProfile] = useState(null);  
+  const { userId, authToken } = useAuth(); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await profileUser(authToken, userId);  // Fetch profile using API
+        const data = await profileUser(authToken, userId); 
         setProfile(data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
@@ -86,14 +86,14 @@ const HeroBanner = () => {
     if (authToken && userId) {
       fetchProfile();
     }
-  }, [authToken, userId]);  // Fetch profile whenever authToken or userId changes
+  }, [authToken, userId]); 
 
   if (!profile) {
-    return <Typography align="center">Loading...</Typography>;  // Show loading if profile is not fetched yet
+    return <Typography align="center">Loading...</Typography>; 
   }
 
   const handleNavigation = (path) => {
-    navigate(path);  // Navigate to the desired path (WishList, Order History)
+    navigate(path); 
   };
 
   return (

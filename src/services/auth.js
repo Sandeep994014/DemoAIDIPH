@@ -33,7 +33,7 @@ export const getEmployeeData = async (employeeId) => {
       throw new Error('No auth token found');
     }
 
-    const response = await axios.get(`/api/v1/reward-service/employee/${employeeId}`, {
+    const response = await axiosInstance.get(`/api/v1/reward-service/employee/${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`,
       },
@@ -69,16 +69,25 @@ export const getProducts = async (userId, page = 1, size = 10) => {
 };
 
 
-export const addToCart = async (productId, quantity, authToken) => {
-  const response = await axiosInstance.post(`/api/v1/reward-service/cart?productId=${productId}&quantity=${quantity}`, {
-    headers: {
-      'Authorization': `Bearer ${authToken}`
-    },
-  });
-  if (!response.ok) {
+export const addToCart = async (productId, quantity, size, authToken) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/v1/reward-service/cart?productId=${productId}&size=${size}&quantity=${quantity}`,
+      {},
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      }
+    );
+
+    // The response data is already parsed, so just return it directly
+    return response.data;
+  } catch (error) {
+    // Handle error (network error or non-2xx status codes)
+    console.error('Error adding product to cart:', error);
     throw new Error('Failed to add product to cart');
   }
-  return response.json();
 };
 
 
@@ -117,21 +126,28 @@ export const updateQuantity = async (productId, quantity, authToken) => {
 
 
 //delete cart items -delete api
-export const removeFromCart = async (productId, authToken) => {
+export const removeFromCart = async (productId, size, authToken) => {
   try {
-    const response = await axiosInstance.delete(`/api/v1/reward-service/cart?productId=${productId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
+    // Construct the URL with both productId and size as query parameters
+    const response = await axiosInstance.delete(
+      `/api/v1/reward-service/cart?productId=${productId}&size=${size}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
       }
-    });
+    );
     return response.data;
   } catch (error) {
+    // Handle error and show toast for unauthorized access
     if (error.response && error.response.status === 401) {
       toast.error('Unauthorized access. Please log in again.');
     }
+    // Rethrow the error for further handling
     throw error;
   }
 };
+
 
 // get user profile api by id
 

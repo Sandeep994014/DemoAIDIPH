@@ -217,7 +217,7 @@ const Delivery = () => {
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'center' }}>
-              <Typography variant="h3">Order History</Typography>
+              <Typography variant="h3">Order </Typography>
             </Grid>
           </Grid>
         </Box>

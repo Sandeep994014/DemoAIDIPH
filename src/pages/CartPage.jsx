@@ -66,12 +66,10 @@ const CartPage = () => {
       setLoadingPoints(true);
       const authToken = localStorage.getItem('authToken');
       const decode = jwt_decode(authToken);
-      console.log(decode.user);
       if (!authToken) {
         throw new Error('No auth token found');
       }
       const response = await profileUser(authToken, userId);
-      console.log("User Points:", response.points);
       setUserPoints(response.points);
     } catch (error) {
       console.log(error.response?.data?.message);
@@ -84,7 +82,7 @@ const CartPage = () => {
     fetchUserPoints();
   }, []);
 
-  // Handle quantity update
+  // Handle updating quantity
   const handleUpdateQuantity = async (productId, quantity) => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -95,19 +93,18 @@ const CartPage = () => {
     }
   };
 
-  // Handle remove from cart
-  const handleRemoveFromCart = async (productId) => {
+  // Handle removing item from cart
+  const handleRemoveFromCart = async (productId, size) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      await removeFromCartService(productId, authToken);
-      setCart(prevCart => prevCart.filter(product => product.id !== productId));
+      await removeFromCartService(productId, size, authToken);
+      setCart(prevCart => prevCart.filter(product => product.id !== productId || product.size !== size)); 
     } catch (error) {
       alert('Failed to remove product from cart');
     }
   };
 
- 
-  // Checkout handler
+  // Handle checkout
   const handleCheckout = () => {
     if (isAuthenticated) {
       if (totalPoints <= userPoints) {
@@ -118,28 +115,25 @@ const CartPage = () => {
     }
   };
 
-  // Fetch user profile
+  // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const authToken = localStorage.getItem('authToken');  // Get authToken from localStorage
+        const authToken = localStorage.getItem('authToken');
         if (!authToken) {
           throw new Error('No auth token found');
         }
-        const response = await profileUser(authToken); // Fetch the profile using the authToken
-       
-        setProfile(response);  // Set the profile data from the response
-      } catch (error) {
-        
-      }
+        const response = await profileUser(authToken);
+        setProfile(response);
+      } catch (error) {}
     };
-
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
-      fetchProfile();  // Call fetchProfile if authToken is found
+      fetchProfile();
     }
-  }, []);  // Empty dependency array to run this effect only once
+  }, []);  
 
+  // Show loading spinner if still fetching cart items
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -148,6 +142,7 @@ const CartPage = () => {
     );
   }
 
+  // Show empty cart message
   if (cart?.length === 0) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 4, textAlign: 'center' }}>
@@ -211,7 +206,7 @@ const CartPage = () => {
                                 <Plus />
                               </IconButton>
                             </Box>
-                            <IconButton color="error" onClick={() => handleRemoveFromCart(product.id)}>
+                            <IconButton color="error" onClick={() => handleRemoveFromCart(product.id, product.size)}>
                               <Trash2 />
                             </IconButton>
                           </Stack>

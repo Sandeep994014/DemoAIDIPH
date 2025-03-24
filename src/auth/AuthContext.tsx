@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import jwt_decode from 'jwt-decode'; 
 import { getEmployeeData } from "../services/auth"; 
-
 const AuthContext = React.createContext();
-
 export const useAuth = () => {
   return React.useContext(AuthContext);
 };
-
 function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(null);
@@ -15,48 +12,39 @@ function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [permissions, setPermissions] = useState([]);
   const [userPoints, setUserPoints] = useState(null);
-  const [loading, setLoading] = useState(true);  // To handle loading state
+  const [loading, setLoading] = useState(true);  
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-
-    // Check if token exists in localStorage
     if (token) {
       setAuthToken(token);
       setIsAuthenticated(true);
-
-      // Decode the token to extract user info
       const decodedToken = jwt_decode(token);
       const extractedUserId = decodedToken.userId;
       const extractedRole = decodedToken.role;
       const extractedPermissions = decodedToken.permissions;
       const extractedUserPoints = decodedToken.userPoints;
-
       setUserId(extractedUserId);
       setRole(extractedRole);
       setPermissions(extractedPermissions);
       setUserPoints(extractedUserPoints);
-
-      // Fetch user points data from API
       fetchUserPointsFromAPI(extractedUserId, token);
     } else {
-      setLoading(false);  // No token means set loading to false
+      setLoading(false); 
     }
   }, []);
-
-  // Fetch points from the API
   const fetchUserPointsFromAPI = async (userId, authToken) => {
     try {
       const points = await getEmployeeData(userId, authToken);
       setUserPoints(points);  
+      setIsAuthenticated(true)
     } catch (error) {
       console.error("Failed to fetch user points:", error);
       setUserPoints(0);  
     } finally {
-      setLoading(false);  // Set loading to false when data is fetched
+      setLoading(false);  
     }
   };
-
   const login = (token) => {
     localStorage.setItem("authToken", token);
     setAuthToken(token);
@@ -66,14 +54,11 @@ function AuthProvider({ children }) {
     const extractedUserId = decodedToken.userId;
     const extractedRole = decodedToken.role;
     const extractedPermissions = decodedToken.permissions;
-
     setUserId(extractedUserId);
     setRole(extractedRole);
     setPermissions(extractedPermissions);
-
     fetchUserPointsFromAPI(extractedUserId, token);
   };
-
   const logout = () => {
     localStorage.removeItem("authToken");
     setAuthToken(null);
@@ -84,7 +69,6 @@ function AuthProvider({ children }) {
     setUserPoints(null);
     alert("Logout successful")
   };
-
   return (
     <AuthContext.Provider
       value={{
@@ -96,12 +80,11 @@ function AuthProvider({ children }) {
         userPoints,
         login,
         logout,
-        loading,  // Provide loading state to inform the app when loading is done
+        loading,  
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
-
 export { AuthProvider as default };

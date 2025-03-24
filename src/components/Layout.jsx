@@ -9,11 +9,11 @@ const Layout = ({ children }) => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh" overflow="hidden">
       
-      {isAuthenticated && (
+    
         <Box position="fixed" width="100%" zIndex={1100}>
           <MenuAppBar />
         </Box>
-      )}
+    
       
       <Box component="main" flexGrow={1} mt={8} overflow="auto">
         {children}

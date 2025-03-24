@@ -49,7 +49,7 @@ export default function LoginPage() {
         alert(error?.response?.data?.message);
       }
     } catch (error) {
-      console.error("Error during login:", error);
+      console.error("Error during login:", error.message);
       const errorMessage = error?.response?.data?.message;
       alert(errorMessage);
     } finally {

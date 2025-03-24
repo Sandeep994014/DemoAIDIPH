@@ -5,10 +5,8 @@ const FavoritesContext = createContext();
 export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
 
-  // Add to favorites if not already present
   const addToFavorites = (product) => {
     setFavorites((prevFavorites) => {
-      // Prevent adding duplicates by checking if the product is already in the favorites list
       if (!prevFavorites.some((item) => item.id === product.id)) {
         return [...prevFavorites, product];
       }
@@ -16,13 +14,16 @@ export const FavoritesProvider = ({ children }) => {
     });
   };
 
-  // Remove from favorites
   const removeFromFavorites = (productId) => {
     setFavorites((prevFavorites) => prevFavorites.filter((item) => item.id !== productId));
   };
 
+  const getFavoritesCount = () => {
+    return favorites.length;  
+  };
+
   return (
-    <FavoritesContext.Provider value={{ favorites, addToFavorites, removeFromFavorites }}>
+    <FavoritesContext.Provider value={{ favorites, addToFavorites, removeFromFavorites, getFavoritesCount }}>
       {children}
     </FavoritesContext.Provider>
   );

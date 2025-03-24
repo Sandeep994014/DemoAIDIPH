@@ -18,7 +18,7 @@ import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 
 const pages = [''];
-const settings = ['Logout']; // Only "Logout" is in the settings array now.
+const settings = ['Logout']; 
 
 function ResponsiveAppBar() {
   const [SideBar, setSideBar] = React.useState(false);
@@ -44,13 +44,9 @@ function ResponsiveAppBar() {
     if (setting === 'Logout') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
-      navigate('/login'); // Navigate to login page after logging out
+      navigate('/login');
     }
     setAnchorElUser(null);
-  };
-
-  const handleOpenSideBarMenu = () => {
-    setSideBar(!SideBar);
   };
 
   const handleOpenCartPage = () => {
@@ -61,12 +57,10 @@ function ResponsiveAppBar() {
     navigate('/wishlist');
   };
 
-  // Check if the authToken is present in localStorage
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
 
-  // Conditionally render the AppBar when the user is authenticated
   if (!isAuthenticated) {
-    return null; // If not authenticated, return nothing (you could also redirect or show a message)
+    return null; 
   }
 
   return (
@@ -142,8 +136,7 @@ function ResponsiveAppBar() {
             AIDIPH
           </Typography>
           
-          {/* Conditionally render the Box only if the user is authenticated */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' , textAlign: 'center' } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex', textAlign: 'center' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
@@ -155,21 +148,27 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {/* Conditionally render Wishlist, Cart, and User Menu only if the user is authenticated */}
           <Box>
-            <IconButton onClick={handleOpenWishlistPage} color='inherit'>
+            <IconButton
+              onClick={handleOpenWishlistPage}
+              color="inherit"
+              className={favorites.length > 0 ? 'highlight' : ''}
+            >
               <Badge badgeContent={favorites.length} color="secondary" sx={{ mr: 2 }}>
                 <Favorite />
               </Badge>
             </IconButton>
-            <IconButton onClick={handleOpenCartPage} color='inherit'>
+            <IconButton
+              onClick={handleOpenCartPage}
+              color="inherit"
+              className={cart.length > 0 ? 'highlight' : ''}
+            >
               <Badge badgeContent={cart.length} color="secondary" sx={{ mr: 2 }}>
                 <ShoppingCart />
               </Badge>
             </IconButton>
           </Box>
 
-          {/* Conditionally render the User settings menu only if the user is authenticated */}
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
