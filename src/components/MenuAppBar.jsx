@@ -21,11 +21,12 @@ const pages = [''];
 const settings = ['Logout']; 
 
 function ResponsiveAppBar() {
-  const [SideBar, setSideBar] = React.useState(false);
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const { cart } = useCart();
-  const { favorites } = useFavorites();
+  const { cart, updateQuantity } = useCart('');
+  console.log("useCart", cart);
+  const { favorites, getFavoritesCount } = useFavorites();
+  console.log("useFavorites", favorites);
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
@@ -56,6 +57,7 @@ function ResponsiveAppBar() {
   const handleOpenWishlistPage = () => {
     navigate('/wishlist');
   };
+
 
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
 
@@ -136,7 +138,8 @@ function ResponsiveAppBar() {
             AIDIPH
           </Typography>
           
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex', textAlign: 'center' } }}>
+          
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' , textAlign: 'center' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
@@ -148,21 +151,14 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
+          
           <Box>
-            <IconButton
-              onClick={handleOpenWishlistPage}
-              color="inherit"
-              className={favorites.length > 0 ? 'highlight' : ''}
-            >
+            <IconButton onClick={handleOpenWishlistPage} color='inherit'>
               <Badge badgeContent={favorites.length} color="secondary" sx={{ mr: 2 }}>
                 <Favorite />
               </Badge>
             </IconButton>
-            <IconButton
-              onClick={handleOpenCartPage}
-              color="inherit"
-              className={cart.length > 0 ? 'highlight' : ''}
-            >
+            <IconButton onClick={handleOpenCartPage} color='inherit'>
               <Badge badgeContent={cart.length} color="secondary" sx={{ mr: 2 }}>
                 <ShoppingCart />
               </Badge>

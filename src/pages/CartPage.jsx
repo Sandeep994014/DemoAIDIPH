@@ -11,7 +11,7 @@ import jwt_decode from 'jwt-decode';
 import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
 
 const CartPage = () => {
-  const { getCartTotal } = useCart();
+  const { getCartTotal,updateQuantity } = useCart();
   const { isAuthenticated, userId } = useAuth();
   const { favorites } = useFavorites(); 
   const [profile, setProfile] = useState(null);
@@ -23,7 +23,7 @@ const CartPage = () => {
   const [userPoints, setUserPoints] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingPoints, setLoadingPoints] = useState(true);
-
+  
   // Fetch cart items
   const cartItems = async () => {
     try {

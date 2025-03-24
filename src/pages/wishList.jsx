@@ -10,6 +10,7 @@ export default function WishList() {
   const [wishlistStatus, setWishlistStatus] = useState(new Set()); 
   const [selectedProduct, setSelectedProduct] = useState(null); 
   const [openDialog, setOpenDialog] = useState(false); 
+  const [favorites, setFavorites] = useState([]);
 
   // Fetch wishlist from the backend
   const fetchWishlist = async () => {
@@ -19,16 +20,17 @@ export default function WishList() {
         const data = await getWishlist(authToken);
         console.log("Wishlist Data:", data);
         setWishlist(data);
-
-       
+  
         const productIds = new Set(data.map(product => product.productId));
-        console.log("Wishlist Status:", productIds);
+        // console.log("Wishlist Status:", productIds);
+        setFavorites(productIds.size);  
         setWishlistStatus(productIds); 
       } catch (error) {
         alert(error.response?.data?.message || 'Error fetching wishlist');
       }
     }
   };
+  
 
   useEffect(() => {
     fetchWishlist();
@@ -89,9 +91,10 @@ export default function WishList() {
       <Typography variant="h4" textAlign={'center'} fontWeight={600} sx={{ mb: 4, textDecoration: 'underline' }}>
         My Wishlist
       </Typography>
+      <Typography variant="h6" gutterBottom textAlign={"center"} > Items in Cart ({favorites})</Typography>
 
       {wishlist.length > 0 ? (
-        <Grid container spacing={4}>
+        <Grid container spacing={4} mt={3}>
           {wishlist.map((product) => (
             <Grid item key={product.productId} xs={12} sm={6} md={4} lg={3}>
               <Card sx={{ maxWidth: 345 }} onClick={() => handleProductClick(product.productId)}>
