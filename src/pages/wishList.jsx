@@ -9,24 +9,29 @@ import { useFavorites } from '../contexts/FavoritesContext';
 export default function WishList() {
   const { addToFavorites, removeFromFavorites } = useFavorites();
   const [wishlist, setWishlist] = useState([]);
+  console.log("wishlist from wishlist page ",wishlist);
   const [wishlistStatus, setWishlistStatus] = useState(new Set());
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   const effectRan = useRef(false); // Prevent double API call in Strict Mode
 
-  const fetchWishlist = async () => {
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) return;
-
-    try {
-      const data = await getWishlist(authToken);
-      setWishlist(data);
-      setWishlistStatus(new Set(data.map(product => product.productId)));
-    } catch (error) {
-      alert(error.response?.data?.message || 'Error fetching wishlist');
-    }
-  };
+ 
+   const fetchWishlist = async () => {
+     const authToken = localStorage.getItem('authToken');
+     if (!authToken) return;
+ 
+     try {
+       const data = await getWishlist(authToken);
+       setWishlist(data);
+     } catch (error) {
+       console.error( error.response?.data?.message);
+     }
+   };
+ 
+   useEffect(() => {
+     fetchWishlist();
+   }, []);
 
   useEffect(() => {
     if (effectRan.current === false) {
@@ -55,7 +60,7 @@ export default function WishList() {
         return newStatus;
       });
     } catch (error) {
-      alert(error.response?.data?.message || 'Error updating wishlist');
+      alert(error.response?.data?.message);
     }
   };
 
@@ -118,7 +123,7 @@ export default function WishList() {
                       handleToggleWishlist(product);
                     }}
                     sx={{
-                      color: wishlistStatus.has(product.productId) ? 'red' : 'gray',
+                      color: wishlistStatus.has(product.productId) === true ? 'red' : 'red',
                     }}
                   >
                     <FavoriteIcon />

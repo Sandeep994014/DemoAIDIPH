@@ -20,6 +20,9 @@ const cartReducer = (state, action) => {
     case 'REMOVE_FROM_CART':
       return state.filter((item) => item.id !== action.payload);
       
+    case 'CLEAR_CART':
+      return [];
+      
     default:
       return state;
   }
@@ -36,14 +39,17 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
   };
 
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+  };
+
   const getCartCount = () => cart.reduce((total, item) => total + item.quantity, 0);
 
-  // ✅ **Added getCartTotal function**
   const getCartTotal = () => 
     cart.reduce((total, item) => total + (item.points * item.quantity), 0); 
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, getCartCount, getCartTotal }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, getCartCount, getCartTotal, clearCart }}>
       {children}
     </CartContext.Provider>
   );

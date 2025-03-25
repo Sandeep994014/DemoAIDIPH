@@ -13,7 +13,6 @@ function AuthProvider({ children }) {
   const [permissions, setPermissions] = useState([]);
   const [userPoints, setUserPoints] = useState(null);
   const [loading, setLoading] = useState(true);  
-
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
@@ -30,6 +29,7 @@ function AuthProvider({ children }) {
       setUserPoints(extractedUserPoints);
       fetchUserPointsFromAPI(extractedUserId, token);
     } else {
+      setIsAuthenticated(false); 
       setLoading(false); 
     }
   }, []);
@@ -70,21 +70,27 @@ function AuthProvider({ children }) {
     alert("Logout successful")
   };
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        authToken,
-        userId,
-        role,
-        permissions,
-        userPoints,
-        login,
-        logout,
-        loading,  
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <>
+      {loading ? (
+        <div>Loading...</div> 
+      ) : (
+        <AuthContext.Provider
+          value={{
+            isAuthenticated,
+            authToken,
+            userId,
+            role,
+            permissions,
+            userPoints,
+            login,
+            logout,
+            loading,  
+          }}
+        >
+          {children}
+        </AuthContext.Provider>
+      )}
+    </>
   );
 }
 export { AuthProvider as default };

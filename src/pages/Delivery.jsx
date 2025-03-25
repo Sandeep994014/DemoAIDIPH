@@ -199,53 +199,31 @@ const Delivery = () => {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#2e3b55', mt: '2' }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <Grid container spacing={2}>
-            <Grid item xs={2} sx={{ textAlign: 'left' }}>
-              <Typography variant="h6">
-                <Button
-                  variant=""
-                  color="primary"
-                  component={Link}
-                  to="/cart"
-                  sx={{ alignItems: 'left' }}
-                >
-                  <ArrowBackIosIcon sx={{ mr: 1 }} />
-                  Go Back
-                </Button>
-              </Typography>
-            </Grid>
-            <Grid item xs={6} sx={{ textAlign: 'center' }}>
-              <Typography variant="h3">Order </Typography>
-            </Grid>
-          </Grid>
-        </Box>
+    <Box sx={{ padding: 4, bgcolor: '#f9f9f9', minHeight: '100vh' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#2e3b55', textAlign: 'center', mb: 4 }}>
+        Order Delivery
       </Typography>
 
-      {/* Address Section */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 6 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <Box sx={{ border: 1, borderRadius: 1, p: 6, bgcolor: 'background.paper' }}>
-            <Typography variant="h5" gutterBottom textAlign="center">
+      <Grid container spacing={4}>
+        {/* Address Section */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 4, borderRadius: 2, boxShadow: 3 }}>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', mb: 2 }}>
               Delivery Address
             </Typography>
-            <Box display="flex" justifyContent="flex-start" alignItems="flex-start" padding={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                component={Link}
-                to="/address"
-              >
-                Add New Address
-              </Button>
-            </Box>
-            <Typography variant="body2" color="textSecondary" gutterBottom>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              component={Link}
+              to="/address"
+              sx={{ mb: 3, display: 'block', mx: 'auto' }}
+            >
+              Add New Address
+            </Button>
+            <Typography variant="body2" color="textSecondary" gutterBottom sx={{ textAlign: 'center', mb: 2 }}>
               Select where you want your items delivered
             </Typography>
-            <Typography variant="h6">Addresses</Typography>
             {addresses.length > 0 ? (
               addresses.map((address, index) => (
                 <Card
@@ -253,13 +231,18 @@ const Delivery = () => {
                   sx={{
                     mb: 2,
                     border: address.isDefault ? '2px solid #4caf50' : '1px solid #ddd',
-                    bgcolor: address.isDefault ? '#f0f8e6' : 'background.paper'
+                    bgcolor: address.isDefault ? '#f0f8e6' : 'background.paper',
+                    cursor: 'pointer',
+                    transition: '0.3s',
+                    '&:hover': { boxShadow: 4 }
                   }}
                   onClick={() => handleCardClick(address)}
                 >
                   <CardContent>
-                    <Typography variant="body1">{address.street1}</Typography>
-                    <Typography variant="body1">{address.city}, {address.state} {address.zip}</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{address.street1}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {address.city}, {address.state} {address.zip}
+                    </Typography>
                   </CardContent>
                   <CardActions>
                     <Button size="small" onClick={() => handleEditClick(address)}>
@@ -269,48 +252,41 @@ const Delivery = () => {
                 </Card>
               ))
             ) : (
-              <Typography>No addresses found.</Typography>
+              <Typography sx={{ textAlign: 'center', color: 'text.secondary' }}>No addresses found.</Typography>
             )}
-          </Box>
-        </Box>
+          </Card>
+        </Grid>
 
         {/* Order Summary */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <Card sx={{ border: 1, borderRadius: 2, p: 4, bgcolor: 'background.paper', boxShadow: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 4, borderRadius: 2, boxShadow: 3 }}>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', mb: 2 }}>
               Order Summary
             </Typography>
-
-            {/* Product Information */}
-            <Box sx={{ mb: 3 }}>
-              {cart.length > 0 ? (
-                cart.map((product, index) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      {product.name} (Size: {product.size})
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Qty: {product.quantity}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      Points per product: {product.points}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      Total Points: {product.totalPoints}
-                    </Typography>
-                  </Box>
-                ))
-              ) : (
-                <Typography>No products found in cart.</Typography>
-              )}
-            </Box>
-
+            {cart.length > 0 ? (
+              cart.map((product, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                    {product.name} (Size: {product.size})
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Qty: {product.quantity}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Points per product: {product.points}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Total Points: {product.totalPoints}
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography sx={{ textAlign: 'center', color: 'text.secondary' }}>No products found in cart.</Typography>
+            )}
             <Divider sx={{ my: 2 }} />
-
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>
-              <strong>Total Points :</strong> {totalPoints}
+            <Typography variant="h6" sx={{ fontWeight: 'bold', textAlign: 'center', mt: 1 }}>
+              Total Points: {totalPoints}
             </Typography>
-
             <Button
               variant="contained"
               onClick={handleCheckout}
@@ -319,8 +295,8 @@ const Delivery = () => {
               Place Order
             </Button>
           </Card>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
 
       {/* Edit Address Modal */}
       <Dialog open={openEditDialog} onClose={handleCloseDialog}>

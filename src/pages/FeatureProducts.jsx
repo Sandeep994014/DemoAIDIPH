@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardMedia, Button, Typography, Grid, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { getProducts, addToCart, toggleWishlist } from '../services/auth';  
@@ -13,6 +13,7 @@ export default function FeatureProducts() {
   const [cartError, setCartError] = useState('');
   const [cartSuccess, setCartSuccess] = useState('');
   const { userId, authToken } = useAuth(); 
+  const effectRan = useRef(false); // Prevent duplicate API calls in Strict Mode
 
   // Fetch products when the component is mounted
   const fetchProducts = async () => {
@@ -40,10 +41,10 @@ export default function FeatureProducts() {
   };
 
   useEffect(() => {
-    if (userId) {
-      fetchProducts();
-    }
-  }, [userId]);
+    if (!authToken || !userId || effectRan.current) return;
+    effectRan.current = true;
+    fetchProducts();
+  }, [authToken, userId]);
 
   // Handle size change for each product
   const handleSizeChange = (productId, size) => {

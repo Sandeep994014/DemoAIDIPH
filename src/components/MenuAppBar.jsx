@@ -23,8 +23,9 @@ const settings = ['Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const { getCartCount } = useCart();
-  const { getFavoritesCount } = useFavorites();
+  const { getCartCount, cart } = useCart();
+  const { getFavoritesCount, wishlist } = useFavorites();
+  console.log("wishlist from menubarapp", getFavoritesCount())
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
@@ -149,12 +150,20 @@ function ResponsiveAppBar() {
 
           <Box>
             <IconButton onClick={handleOpenWishlistPage} color='inherit'>
-              <Badge badgeContent={getFavoritesCount()} color="secondary" sx={{ mr: 2 }}>
+              <Badge 
+                badgeContent={wishlist.length > 0 ? wishlist.length : null} 
+                color="secondary" 
+                sx={{ mr: 2 }}
+              >
                 <Favorite />
               </Badge>
             </IconButton>
             <IconButton onClick={handleOpenCartPage} color='inherit'>
-              <Badge badgeContent={getCartCount()} color="secondary" sx={{ mr: 2 }}>
+              <Badge 
+                badgeContent={cart.length > 0 ? cart.length : null} 
+                color="secondary" 
+                sx={{ mr: 2 }}
+              >
                 <ShoppingCart />
               </Badge>
             </IconButton>
