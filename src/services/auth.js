@@ -14,7 +14,6 @@ export const login = async (payloadData) => {
       localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('refreshToken', response.data.refreshToken);
 
-      // Update axios header immediately after setting the token
       updateAxiosAuthHeader(response.data.accessToken);
     }
 

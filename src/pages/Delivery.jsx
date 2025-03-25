@@ -200,11 +200,16 @@ const Delivery = () => {
 
   return (
     <Box sx={{ padding: 4, bgcolor: '#f9f9f9', minHeight: '100vh' }}>
+       <Button variant="" color="primary" component={Link} to="/cart">
+        <ArrowBackIosIcon sx={{ mr: 1 }} />
+        Continue Shopping
+      </Button>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#2e3b55', textAlign: 'center', mb: 4 }}>
         Order Delivery
       </Typography>
+     
 
-      <Grid container spacing={4}>
+      <Grid container spacing={4} mt={1}>
         {/* Address Section */}
         <Grid item xs={12} md={6}>
           <Card sx={{ p: 4, borderRadius: 2, boxShadow: 3 }}>

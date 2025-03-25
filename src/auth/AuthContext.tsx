@@ -19,11 +19,13 @@ function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
+      //rember the point The initializeAuthState(token) function is likely part of your authentication flow, ensuring that the user's session remains active when they revisit your site.
       initializeAuthState(token);
     } else {
       setLoading(false); 
     }
   }, []);
+
 
   const initializeAuthState = (token) => {
     setAuthToken(token);
