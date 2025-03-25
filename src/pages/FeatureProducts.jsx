@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardMedia, Button, Typography, Grid, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { getProducts, addToCart, toggleWishlist } from '../services/auth';  
-import { useAuth } from '../auth/AuthContext';
-import { Favorite } from '@mui/icons-material';
+import { getProducts, toggleWishlist, addToCart as addToCartAPI } from '../services/auth';  
+import { useAuth } from '../auth/AuthContext'; // Updated import
+import { Favorite } from '@mui/icons-material'; // Updated import
+import { useCart } from '../contexts/CartContext'; // Updated import
+import { useFavorites } from '../contexts/FavoritesContext'; // Updated import
 
 export default function FeatureProducts() {
   const [products, setProducts] = useState([]);
@@ -13,6 +15,8 @@ export default function FeatureProducts() {
   const [cartError, setCartError] = useState('');
   const [cartSuccess, setCartSuccess] = useState('');
   const { userId, authToken } = useAuth(); 
+  const { addToCart } = useCart(); // Updated context usage
+  const { addToFavorites, removeFromFavorites } = useFavorites(); // Updated context usage
   const effectRan = useRef(false); // Prevent duplicate API calls in Strict Mode
 
   // Fetch products when the component is mounted
@@ -62,15 +66,26 @@ export default function FeatureProducts() {
       return;
     }
 
-    const selectedQuantity = quantity > 0 ? quantity : 1; // Ensure valid quantity
-    const selectedSizeValue = selectedSize[product.id]?.size;  // Get the size from the selected state
+    const selectedQuantity = quantity > 0 ? quantity : 1;
+    const selectedSizeValue = selectedSize[product.id]?.size;
 
     try {
-      // Pass productId, quantity, selectedSizeValue to the service
-      const response = await addToCart(product.id, selectedQuantity, selectedSizeValue, authToken);
+      // Call the context-based addToCart
+      addToCart({
+        id: product.id,
+        name: product.name,
+        size: selectedSizeValue,
+        quantity: selectedQuantity,
+        points: product.point,
+        image: selectedSize[product.id]?.imageUrls[0] || product.imageUrls[0],
+      });
+
+      // Call the API-based addToCart
+      const response = await addToCartAPI(product.id, selectedQuantity, selectedSizeValue, authToken);
+      alert(response.message); // Assuming `response.message` is the success message
+
       setCartSuccess("Product added to cart successfully!");
       setCartError("");
-      alert(response.message);  // Assuming `response.message` is the success message
     } catch (error) {
       setCartError("Failed to add the product to the cart. Please try again.");
       setCartSuccess("");
@@ -80,18 +95,23 @@ export default function FeatureProducts() {
   // Toggle product wishlist status
   const handleToggleWishlist = async (productId) => {
     try {
-      const response = await toggleWishlist(productId, authToken);
-      setProducts(prevState => prevState.map(product =>
-        product.id === productId
-          ? { 
-              ...product, 
-              isInWishlist: !product.isInWishlist 
-            }
-          : product
-      ));
-      alert(response.message);
-      fetchProducts();
-      setLoading(true);
+      const product = products.find((p) => p.id === productId);
+      if (product.isInWishlist) {
+        removeFromFavorites(productId); // Call context-based removeFromFavorites
+      } else {
+        addToFavorites(product); // Call context-based addToFavorites
+      }
+
+      // Call the API to toggle wishlist
+      await toggleWishlist(productId, authToken);
+
+      setProducts((prevState) =>
+        prevState.map((product) =>
+          product.id === productId
+            ? { ...product, isInWishlist: !product.isInWishlist }
+            : product
+        )
+      );
     } catch (error) {
       console.error('Error toggling wishlist:', error);
     }
