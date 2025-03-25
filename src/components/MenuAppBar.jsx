@@ -23,8 +23,8 @@ const settings = ['Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const { cart, getCartCount } = useCart();
-  const { favorites, getFavoritesCount } = useFavorites();
+  const { getCartCount } = useCart();
+  const { getFavoritesCount } = useFavorites();
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {

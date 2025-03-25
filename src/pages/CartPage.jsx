@@ -116,22 +116,22 @@ const CartPage = () => {
   };
 
   // Fetch profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const authToken = localStorage.getItem('authToken');
-        if (!authToken) {
-          throw new Error('No auth token found');
-        }
-        const response = await profileUser(authToken , userId);
-        setProfile(response);
-      } catch (error) {}
-    };
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      fetchProfile();
-    }
-  }, []);  
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const authToken = localStorage.getItem('authToken');
+  //       if (!authToken) {
+  //         throw new Error('No auth token found');
+  //       }
+  //       const response = await profileUser(authToken , userId);
+  //       setProfile(response);
+  //     } catch (error) {}
+  //   };
+  //   const authToken = localStorage.getItem('authToken');
+  //   if (authToken) {
+  //     fetchProfile();
+  //   }
+  // }, []);  
 
   // Show loading spinner if still fetching cart items
   if (loading) {

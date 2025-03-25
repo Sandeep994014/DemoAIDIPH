@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { getWishlist, toggleWishlist, getProductById } from '../services/auth';
 import { Card, CardContent, Typography, CardMedia, CardActions, Button, Grid, Box, IconButton, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -7,33 +7,35 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useFavorites } from '../contexts/FavoritesContext';
 
 export default function WishList() {
-  const { favorites, addToFavorites, removeFromFavorites, getFavoritesCount } = useFavorites();
+  const { addToFavorites, removeFromFavorites } = useFavorites();
   const [wishlist, setWishlist] = useState([]);
   const [wishlistStatus, setWishlistStatus] = useState(new Set());
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Fetch wishlist and sync with context
+  const effectRan = useRef(false); // Prevent double API call in Strict Mode
+
   const fetchWishlist = async () => {
     const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      try {
-        const data = await getWishlist(authToken);
-        setWishlist(data);
+    if (!authToken) return;
 
-        // Sync context
-        setWishlistStatus(new Set(data.map(product => product.productId)));
-        data.forEach(product => {
-          addToFavorites({ id: product.productId, ...product });
-        });
-      } catch (error) {
-        alert(error.response?.data?.message || 'Error fetching wishlist');
-      }
+    try {
+      const data = await getWishlist(authToken);
+      setWishlist(data);
+      setWishlistStatus(new Set(data.map(product => product.productId)));
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error fetching wishlist');
     }
   };
 
   useEffect(() => {
-    fetchWishlist();
+    if (effectRan.current === false) {
+      fetchWishlist();
+    }
+
+    return () => {
+      effectRan.current = true;
+    };
   }, []);
 
   const handleToggleWishlist = async (product) => {
@@ -46,15 +48,12 @@ export default function WishList() {
 
       await toggleWishlist(product.productId, token);
 
-      // Optimistically toggle locally
-      if (wishlistStatus.has(product.productId)) {
-        removeFromFavorites(product.productId);
-      } else {
-        addToFavorites({ id: product.productId, ...product });
-      }
-
-      fetchWishlist();
-
+      setWishlist(prevWishlist => prevWishlist.filter(item => item.productId !== product.productId));
+      setWishlistStatus(prevStatus => {
+        const newStatus = new Set(prevStatus);
+        newStatus.delete(product.productId);
+        return newStatus;
+      });
     } catch (error) {
       alert(error.response?.data?.message || 'Error updating wishlist');
     }
@@ -88,7 +87,7 @@ export default function WishList() {
       </Typography>
 
       <Typography variant="h6" gutterBottom textAlign={"center"}>
-        Items in Wishlist ({getFavoritesCount()})
+        Items in Wishlist ({wishlist.length})
       </Typography>
 
       {wishlist.length > 0 ? (
@@ -133,7 +132,6 @@ export default function WishList() {
         <Typography variant="h6" textAlign={'center'}>Your wishlist is empty</Typography>
       )}
 
-      {/* Product Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>{selectedProduct ? selectedProduct.name : ''}</DialogTitle>
         <DialogContent>

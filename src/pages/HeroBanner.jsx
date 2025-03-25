@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Card, CardContent, Divider, Avatar, styled, Button } from '@mui/material';
-import { profileUser } from '../services/auth';  
-import { useNavigate } from 'react-router-dom';  
-import { useAuth } from '../auth/AuthContext';  
-
+import { profileUser } from '../services/auth';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 const HeroCard = styled(Box)(() => ({
   padding: '20px',
@@ -23,7 +22,7 @@ const LeftCard = styled(Card)(() => ({
   backgroundColor: '#ffffff',
   boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
   borderRadius: '8px',
-  marginRight: '20px', 
+  marginRight: '20px',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
@@ -38,7 +37,6 @@ const AvatarStyled = styled(Avatar)(() => ({
   fontSize: '2rem',
   marginBottom: '10px',
 }));
-
 
 const ButtonContainer = styled(Box)(() => ({
   marginTop: '20px',
@@ -55,7 +53,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: '8px',
   transition: 'background-color 0.3s ease',
   '&:hover': {
-    backgroundColor: theme.palette.primary.dark, 
+    backgroundColor: theme.palette.primary.dark,
     color: 'white',
   },
   '&.MuiButton-outlined': {
@@ -69,40 +67,45 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 const HeroBanner = () => {
-  const [profile, setProfile] = useState(null);  
-  const { userId, authToken } = useAuth(); 
-  const navigate = useNavigate(); 
+  const [profile, setProfile] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false); // Prevent multiple API calls
+  const { userId, authToken } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!authToken || !userId) {
+        console.warn('Missing authToken or userId');
+        return;
+      }
+
       try {
-        const data = await profileUser(authToken, userId); 
+        const data = await profileUser(authToken, userId);
         setProfile(data);
+        setHasFetched(true); // Mark API call as completed
       } catch (error) {
         console.error('Failed to fetch profile:', error);
       }
     };
 
-    if (authToken && userId) {
+    if (!hasFetched) {
       fetchProfile();
     }
-  }, [authToken, userId]); 
+  }, [authToken, userId, hasFetched]); // `hasFetched` ensures API runs only once
 
   if (!profile) {
-    return <Typography align="center">Loading...</Typography>; 
+    return <Typography align="center">Loading...</Typography>;
   }
 
   const handleNavigation = (path) => {
-    navigate(path); 
+    navigate(path);
   };
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '50vh' }}>
-      
       <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <LeftCard>
           <CardContent>
-      
             <AvatarStyled alt="User Avatar">{profile.firstName?.[0] || 'U'}</AvatarStyled>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               {profile.firstName} {profile.lastName}
@@ -114,7 +117,6 @@ const HeroBanner = () => {
             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
               <strong>Points:</strong> {profile.points || 0}
             </Typography>
-           
             <ButtonContainer sx={{ marginY: 10 }}>
               <StyledButton variant="outlined" onClick={() => handleNavigation('/wishlist')}>
                 WishList

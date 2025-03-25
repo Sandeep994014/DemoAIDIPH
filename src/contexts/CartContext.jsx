@@ -1,70 +1,50 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 
-// Create CartContext
 const CartContext = createContext();
 
-// CartProvider component
-export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+export const useCart = () => useContext(CartContext);
 
-  // Add product to cart
-  const addToCart = (product) => {
-    setCart((prevCart) => {
-      const existingProduct = prevCart.find(item => item.id === product.id);
+const cartReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_TO_CART':
+      const existingProduct = state.find((item) => item.id === action.payload.id);
       if (existingProduct) {
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + product.quantity }
+        return state.map((item) =>
+          item.id === action.payload.id
+            ? { ...item, quantity: item.quantity + action.payload.quantity }
             : item
         );
       }
-      return [...prevCart, product];
-    });
+      return [...state, action.payload];
+      
+    case 'REMOVE_FROM_CART':
+      return state.filter((item) => item.id !== action.payload);
+      
+    default:
+      return state;
+  }
+};
+
+export const CartProvider = ({ children }) => {
+  const [cart, dispatch] = useReducer(cartReducer, []);
+
+  const addToCart = (product) => {
+    dispatch({ type: 'ADD_TO_CART', payload: product });
   };
 
-  // Update product quantity
-  const updateQuantity = (productId, quantity) => {
-    setCart((prevCart) =>
-      prevCart.map(product =>
-        product.id === productId ? { ...product, quantity } : product
-      )
-    );
-  };
-
-  // Remove product from cart
   const removeFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter(product => product.id !== productId));
+    dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
   };
 
-  // Calculate total price
-  const getCartTotal = () => {
-    return cart.reduce((total, product) => total + product.price * product.quantity, 0);
-  };
+  const getCartCount = () => cart.reduce((total, item) => total + item.quantity, 0);
 
-  // Check if a product exists
-  const isProductInCart = (productId) => {
-    return cart.some(product => product.id === productId);
-  };
-
-  // Get total count
-  const getCartCount = () => {
-    return cart.reduce((count, product) => count + product.quantity, 0);
-  };
+  // ✅ **Added getCartTotal function**
+  const getCartTotal = () => 
+    cart.reduce((total, item) => total + (item.points * item.quantity), 0); 
 
   return (
-    <CartContext.Provider value={{
-      cart,
-      addToCart,
-      updateQuantity,
-      removeFromCart,
-      getCartTotal,
-      isProductInCart,
-      getCartCount
-    }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, getCartCount, getCartTotal }}>
       {children}
     </CartContext.Provider>
   );
 };
-
-// Custom hook
-export const useCart = () => useContext(CartContext);

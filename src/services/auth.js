@@ -9,7 +9,7 @@ export const login = async (payloadData) => {
         'Authorization': `Bearer ${payloadData.bearerToken}`
       }
     });
-    console.log("res====>>>",response);
+    // console.log("res====>>>",response);
     if (response?.data?.accessToken) {
       localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('refreshToken', response.data.refreshToken);
