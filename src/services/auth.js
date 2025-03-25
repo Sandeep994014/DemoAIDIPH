@@ -1,4 +1,4 @@
-import axiosInstance from '../services/axios';
+import axiosInstance, { updateAxiosAuthHeader } from '../services/axios';
 import { toast } from 'react-toastify';
 
 //working fine
@@ -9,15 +9,18 @@ export const login = async (payloadData) => {
         'Authorization': `Bearer ${payloadData.bearerToken}`
       }
     });
-    // console.log("res====>>>",response);
+
     if (response?.data?.accessToken) {
       localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('refreshToken', response.data.refreshToken);
+
+      // Update axios header immediately after setting the token
+      updateAxiosAuthHeader(response.data.accessToken);
     }
+
     return response;
   } catch (error) {
     toast.error('Login failed. Please check your credentials.');
-
     throw error;
   }
 };

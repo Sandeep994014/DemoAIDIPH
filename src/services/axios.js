@@ -27,6 +27,11 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Add a method to update the Authorization header dynamically
+export const updateAxiosAuthHeader = (token) => {
+  axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+};
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

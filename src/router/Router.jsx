@@ -1,5 +1,5 @@
 // src/router/Router.jsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import HomePage from '../pages/HomePage';
@@ -14,13 +14,11 @@ import Address from '../pages/Address';
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem('authToken');
 
-  
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !token) {
     return <Navigate to="/login" />;
   }
-    
- 
 
   return children;
 }
