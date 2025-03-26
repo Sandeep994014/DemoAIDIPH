@@ -110,9 +110,9 @@ export const fetchCart = async (authToken) => {
 };
 
 // update carts items quantity patch api
-export const updateQuantity = async (productId, quantity, authToken) => {
+export const updateQuantity = async (queryParams, authToken) => {
   try {
-    const response = await axiosInstance.patch(`/api/v1/reward-service/cart/update-quantity?productId=${productId}&quantityChange=${quantity}`, {
+    const response = await axiosInstance.patch(`/api/v1/reward-service/cart/update-quantity${queryParams}`, {}, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }

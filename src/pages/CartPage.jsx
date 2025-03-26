@@ -84,13 +84,25 @@ const CartPage = () => {
   }, []);
 
   // Handle updating quantity
-  const handleUpdateQuantity = async (productId, quantity) => {
+  const handleUpdateQuantity = async (productId, quantityChange, size) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      await updateQuantityService(productId, quantity, authToken);
-      setCart(prevCart => prevCart.map(product => product.id === productId ? { ...product, quantity } : product));
+      await updateQuantityService(`?productId=${productId}&quantityChange=${quantityChange}&size=${size}`, authToken);
+      setCart(prevCart => {
+        const existingProduct = prevCart.find(product => product.id === productId && product.size === size);
+        if (existingProduct) {
+          return prevCart.map(product =>
+            product.id === productId && product.size === size
+              ? { ...product, quantity: product.quantity + quantityChange }
+              : product
+          );
+        } else {
+          const newProduct = { id: productId, size, quantity: quantityChange, points: 0, totalPoints: 0, image: "/placeholder.svg" };
+          return [...prevCart, newProduct];
+        }
+      });
     } catch (error) {
-      alert(error.response.data.message);
+      alert(error.response?.data?.message || 'Failed to update quantity');
     }
   };
 
@@ -223,7 +235,7 @@ const CartPage = () => {
                               }}
                             >
                               <IconButton
-                                onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
+                                onClick={() => handleUpdateQuantity(product.id, -1, product.size)}
                                 disabled={product.quantity <= 1}
                                 sx={{ padding: 1 }}
                               >
@@ -236,7 +248,7 @@ const CartPage = () => {
                                 {product.quantity}
                               </Typography>
                               <IconButton
-                                onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
+                                onClick={() => handleUpdateQuantity(product.id, 1, product.size)}
                                 sx={{ padding: 1 }}
                               >
                                 <Plus />
