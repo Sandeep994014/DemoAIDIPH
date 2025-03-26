@@ -26,20 +26,17 @@ function AuthProvider({ children }) {
     }
   }, []);
 
-
   const initializeAuthState = (token) => {
     setAuthToken(token);
     setIsAuthenticated(true);
     const decodedToken = jwt_decode(token);
-    const extractedUserId = decodedToken.userId;
-    const extractedRole = decodedToken.role;
-    const extractedPermissions = decodedToken.permissions;
-    const extractedUserPoints = decodedToken.userPoints;
+    const extractedUserId = decodedToken.userId; // Extract userId
+    const extractedRole = decodedToken.role; // Extract role
+    const extractedPermissions = decodedToken.permissions; // Extract permissions
     setUserId(extractedUserId);
     setRole(extractedRole);
     setPermissions(extractedPermissions);
-    setUserPoints(extractedUserPoints);
-    fetchUserPointsFromAPI(extractedUserId, token);
+    fetchUserPointsFromAPI(extractedUserId, token); // Fetch user points using userId
   };
 
   const fetchUserPointsFromAPI = async (userId, token) => {

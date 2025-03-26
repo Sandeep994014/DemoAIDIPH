@@ -14,13 +14,29 @@ export default function FeatureProducts() {
   const [selectedSize, setSelectedSize] = useState({}); 
   const [cartError, setCartError] = useState('');
   const [cartSuccess, setCartSuccess] = useState('');
-  const { userId, authToken } = useAuth(); 
+  const [userId, setUserId] = useState(null); // Updated to use state for userId
+  const [authToken, setAuthToken] = useState(null); // Updated to use state for authToken
   const { addToCart } = useCart(); // Updated context usage
   const { addToFavorites, removeFromFavorites } = useFavorites(); // Updated context usage
   const effectRan = useRef(false); // Prevent duplicate API calls in Strict Mode
 
+  // Decode JWT token to extract userId
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setAuthToken(token);
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUserId(payload.userId);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  }, []);
+
   // Fetch products when the component is mounted
   const fetchProducts = async () => {
+    if (!userId) return; // Ensure userId is available
     setLoading(true);
     try {
       const productsData = await getProducts(userId);

@@ -3,6 +3,7 @@ import { Box, Grid, Typography, Card, CardContent, Divider, Avatar, styled, Butt
 import { profileUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import jwtDecode from 'jwt-decode'; // Add this import
 
 const StyledCard = styled(Card)(() => ({
   padding: '20px',
@@ -36,16 +37,25 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const HeroBanner = () => {
   const [profile, setProfile] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
-  const { userId, authToken } = useAuth();
+  const [userId, setUserId] = useState(null); // Add state for userId
+  const [authToken, setAuthToken] = useState(null); // Add state for authToken
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!authToken || !userId) {
-        console.warn('Missing authToken or userId');
-        return;
+    const initializeAuth = () => {
+      const token = localStorage.getItem('authToken'); // Fetch token from localStorage
+      if (token) {
+        setAuthToken(token);
+        const decodedToken = jwtDecode(token); // Decode the token
+        setUserId(decodedToken.userId); // Extract and set userId
       }
+    };
 
+    initializeAuth();
+  }, []); // Run only once on component mount
+
+  useEffect(() => {
+    const fetchProfile = async () => {
       try {
         const data = await profileUser(authToken, userId);
         setProfile(data);
@@ -55,7 +65,7 @@ const HeroBanner = () => {
       }
     };
 
-    if (!hasFetched) {
+    if (authToken && userId && !hasFetched) {
       fetchProfile();
     }
   }, [authToken, userId, hasFetched]);
