@@ -9,7 +9,6 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../auth/AuthContext';
 import jwt_decode from 'jwt-decode';
 import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
-
 const CartPage = () => {
   const { getCartTotal } = useCart();
   const { isAuthenticated, userId } = useAuth();
@@ -24,8 +23,6 @@ const CartPage = () => {
   const [userPoints, setUserPoints] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingPoints, setLoadingPoints] = useState(true);
-
-  // Fetch cart items
   const cartItems = async () => {
     try {
       setLoading(true);
@@ -50,18 +47,14 @@ const CartPage = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     cartItems();
   }, []);
-
   useEffect(() => {
     setCartTotal(getCartTotal());
     setTotalPoints(cart.reduce((acc, product) => acc + product.points * product.quantity, 0));
     setTotalProducts(cart.reduce((acc, product) => acc + product.quantity, 0));
   }, [cart, getCartTotal]);
-
-  // Fetch user points 
   const fetchUserPoints = async () => {
     try {
       setLoadingPoints(true);
@@ -78,12 +71,9 @@ const CartPage = () => {
       setLoadingPoints(false);
     }
   };
-
   useEffect(() => {
     fetchUserPoints();
   }, []);
-
-  // Handle updating quantity
   const handleUpdateQuantity = async (productId, quantityChange, size) => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -105,8 +95,6 @@ const CartPage = () => {
       alert(error.response?.data?.message || 'Failed to update quantity');
     }
   };
-
-  // Handle removing item from cart
   const handleRemoveFromCart = async (productId, size) => {
     try {
       const authToken = localStorage.getItem('authToken');
@@ -116,8 +104,6 @@ const CartPage = () => {
       alert('Failed to remove product from cart');
     }
   };
-
-  // Handle checkout
   const handleCheckout = () => {
     if (isAuthenticated) {
       if (totalPoints <= userPoints) {
@@ -127,26 +113,6 @@ const CartPage = () => {
       }
     }
   };
-
-  // Fetch profile
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const authToken = localStorage.getItem('authToken');
-  //       if (!authToken) {
-  //         throw new Error('No auth token found');
-  //       }
-  //       const response = await profileUser(authToken , userId);
-  //       setProfile(response);
-  //     } catch (error) {}
-  //   };
-  //   const authToken = localStorage.getItem('authToken');
-  //   if (authToken) {
-  //     fetchProfile();
-  //   }
-  // }, []);  
-
-  // Show loading spinner if still fetching cart items
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -154,8 +120,6 @@ const CartPage = () => {
       </Box>
     );
   }
-
-  // Show empty cart message
   if (cart?.length === 0) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 4, textAlign: 'center' }}>
@@ -310,5 +274,4 @@ const CartPage = () => {
     );
   }
 };
-
 export default CartPage;

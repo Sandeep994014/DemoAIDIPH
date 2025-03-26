@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import jwt_decode from 'jwt-decode'; 
 import { getEmployeeData } from "../services/auth"; 
-
 const AuthContext = React.createContext();
 export const useAuth = () => {
   return React.useContext(AuthContext);
 };
-
 function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(null);
@@ -15,30 +13,26 @@ function AuthProvider({ children }) {
   const [permissions, setPermissions] = useState([]);
   const [userPoints, setUserPoints] = useState(null);
   const [loading, setLoading] = useState(true);  
-
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      //rember the point The initializeAuthState(token) function is likely part of your authentication flow, ensuring that the user's session remains active when they revisit your site.
       initializeAuthState(token);
     } else {
       setLoading(false); 
     }
   }, []);
-
   const initializeAuthState = (token) => {
     setAuthToken(token);
     setIsAuthenticated(true);
     const decodedToken = jwt_decode(token);
-    const extractedUserId = decodedToken.userId; // Extract userId
-    const extractedRole = decodedToken.role; // Extract role
-    const extractedPermissions = decodedToken.permissions; // Extract permissions
+    const extractedUserId = decodedToken.userId; 
+    const extractedRole = decodedToken.role; 
+    const extractedPermissions = decodedToken.permissions; 
     setUserId(extractedUserId);
     setRole(extractedRole);
     setPermissions(extractedPermissions);
-    fetchUserPointsFromAPI(extractedUserId, token); // Fetch user points using userId
+    fetchUserPointsFromAPI(extractedUserId, token); 
   };
-
   const fetchUserPointsFromAPI = async (userId, token) => {
     try {
       const points = await getEmployeeData(userId, token);
@@ -50,13 +44,11 @@ function AuthProvider({ children }) {
       setLoading(false);  
     }
   };
-
   const login = (token) => {
     localStorage.setItem("authToken", token);
     initializeAuthState(token);
     alert("Login successful");
   };
-
   const logout = () => {
     localStorage.removeItem("authToken");
     setAuthToken(null);
@@ -67,7 +59,6 @@ function AuthProvider({ children }) {
     setUserPoints(null);
     alert("Logout successful");
   };
-
   return (
     <>
       {loading ? (
@@ -92,5 +83,4 @@ function AuthProvider({ children }) {
     </>
   );
 }
-
 export { AuthProvider as default };

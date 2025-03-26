@@ -3,15 +3,13 @@ import { Box, Grid, Typography, Card, CardContent, Divider, Avatar, styled, Butt
 import { profileUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import jwtDecode from 'jwt-decode'; // Add this import
-
+import jwtDecode from 'jwt-decode'; 
 const StyledCard = styled(Card)(() => ({
   padding: '20px',
   borderRadius: '12px',
   boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
   backgroundColor: '#ffffff',
 }));
-
 const StyledAvatar = styled(Avatar)(() => ({
   width: '100px',
   height: '100px',
@@ -20,7 +18,6 @@ const StyledAvatar = styled(Avatar)(() => ({
   fontSize: '2.5rem',
   marginBottom: '15px',
 }));
-
 const StyledButton = styled(Button)(({ theme }) => ({
   padding: '10px 20px',
   textTransform: 'none',
@@ -33,27 +30,23 @@ const StyledButton = styled(Button)(({ theme }) => ({
     color: 'white',
   },
 }));
-
 const HeroBanner = () => {
   const [profile, setProfile] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
-  const [userId, setUserId] = useState(null); // Add state for userId
-  const [authToken, setAuthToken] = useState(null); // Add state for authToken
+  const [userId, setUserId] = useState(null); 
+  const [authToken, setAuthToken] = useState(null); 
   const navigate = useNavigate();
-
   useEffect(() => {
     const initializeAuth = () => {
-      const token = localStorage.getItem('authToken'); // Fetch token from localStorage
+      const token = localStorage.getItem('authToken'); 
       if (token) {
         setAuthToken(token);
-        const decodedToken = jwtDecode(token); // Decode the token
-        setUserId(decodedToken.userId); // Extract and set userId
+        const decodedToken = jwtDecode(token); 
+        setUserId(decodedToken.userId); 
       }
     };
-
     initializeAuth();
-  }, []); // Run only once on component mount
-
+  }, []); 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -64,24 +57,20 @@ const HeroBanner = () => {
         console.error('Failed to fetch profile:', error);
       }
     };
-
     if (authToken && userId && !hasFetched) {
       fetchProfile();
     }
   }, [authToken, userId, hasFetched]);
-
   if (!profile) {
     return <Typography align="center">Loading...</Typography>;
   }
-
   const handleNavigation = (path) => {
     navigate(path);
   };
-
   return (
     <Box sx={{ padding: '20px', backgroundColor: '', minHeight: 'auto' }}>
       <Grid container spacing={4}>
-        {/* Left Side: User Details */}
+        {}
         <Grid item xs={12} md={4}>
           <StyledCard>
             <CardContent>
@@ -107,8 +96,7 @@ const HeroBanner = () => {
             </CardContent>
           </StyledCard>
         </Grid>
-
-        {/* Right Side: Product Details */}
+        {}
         <Grid item xs={12} md={8}>
           <StyledCard sx={{ height: '100%' }}>
             <Grid container spacing={4} sx={{ height: '100%' }}>
@@ -124,7 +112,6 @@ const HeroBanner = () => {
                 <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
                   Discover the best products at unbeatable prices.
                 </Typography>
-                
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box
@@ -137,7 +124,7 @@ const HeroBanner = () => {
                   }}
                 >
                   <img
-                    src="https://www.boat-lifestyle.com/cdn/shop/products/0cfa4417-0213-4b49-b78e-0ae68aeb7057_600x.png?v=1625046144"
+                    src="https:
                     alt="Product Preview"
                     style={{ width: '80%', borderRadius: '12px' }}
                   />
@@ -150,5 +137,4 @@ const HeroBanner = () => {
     </Box>
   );
 };
-
 export default HeroBanner;
