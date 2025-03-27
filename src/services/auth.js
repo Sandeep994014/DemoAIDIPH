@@ -326,17 +326,26 @@ export const checkoutOrder = async (employeeId, addressId, authToken) => {
 };
 
 //order history api -get
-export const getOrderHistory = async (authToken) => {
+export const getOrderHistory = async (authToken, employeeId) => {
   try {
-    const response = await axiosInstance.get('/api/v1/reward-service/order?employeeId=1', {
+    if (!authToken) {
+      throw new Error('Authorization token is missing.');
+    }
+    const response = await axiosInstance.get(`/api/v1/reward-service/order?employeeId=${employeeId}`, {
       headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
+        'Authorization': `Bearer ${authToken}`,
+      },
     });
     return response.data;
   } catch (error) {
-    if (error.response && error.response.status === 401) {
-      toast.error('Unauthorized access. Please log in again.');
+    if (error.response) {
+      if (error.response.status === 401) {
+        toast.error('Unauthorized access. Please log in again.');
+      } else {
+        toast.error(`Error: ${error.response.data?.message || 'Failed to fetch order history.'}`);
+      }
+    } else {
+      toast.error('Network error. Please try again later.');
     }
     throw error;
   }

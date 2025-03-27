@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getOrderHistory } from '../services/auth';
-import { Grid, Typography, Box, Paper, Button, Divider } from '@mui/material';
+import { Grid, Typography, Box, Paper, Button, Divider, Chip } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { Link } from 'react-router-dom';
+import jwt_decode from 'jwt-decode';
 
 export default function History() {
   const [orderHistory, setOrderHistory] = useState([]);
@@ -15,7 +16,10 @@ export default function History() {
         setError('No authorization token found. Please log in again.');
         return;
       }
-      const data = await getOrderHistory(authToken);
+      const decode = jwt_decode(authToken);
+      const userId = decode.userId; 
+      console.log("userId", userId);
+      const data = await getOrderHistory(authToken, userId);
       const sortedOrders = data
         .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
         .sort((a, b) => b.orderId - a.orderId);
@@ -47,39 +51,71 @@ export default function History() {
   };
 
   return (
-    <Box sx={{ padding: '20px', backgroundColor: '#f7f7f7', minHeight: '100vh' }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#2e3b55', textAlign: 'center', mb: 4 }}>
+    <Box sx={{ padding: '20px', backgroundColor: '#f0f4f8', minHeight: '100vh' }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 'bold',
+          color: '#2e3b55',
+          textAlign: 'center',
+          mb: 4,
+          textTransform: 'uppercase',
+        }}
+      >
         Order History
       </Typography>
 
       <Button
-        variant=""
+        variant="contained"
         color="primary"
         component={Link}
         to="/"
         startIcon={<ArrowBackIosIcon />}
-        sx={{ mb: 4 }}
+        sx={{ mb: 4, textTransform: 'none' }}
       >
-        Bck to Home
+        Back to Home
       </Button>
 
       {orderHistory.length > 0 ? (
         orderHistory.map((order) => (
-          <Paper key={order.orderId} elevation={3} sx={{ padding: 3, mb: 4, borderRadius: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', color: getStatusColor(order.status) }}>
-                {order.status}
-              </Typography>
-              
+          <Paper
+            key={order.orderId}
+            elevation={3}
+            sx={{
+              padding: 3,
+              mb: 4,
+              borderRadius: 2,
+              backgroundColor: '#ffffff',
+              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
+            >
+              <Chip
+                label={order.status}
+                sx={{
+                  backgroundColor: getStatusColor(order.status),
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                }}
+              />
             </Box>
 
             <Divider sx={{ mb: 2 }} />
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
                 Order ID: {order.orderId}
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 1 }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
                 Total Points: {order.totalPoint}
               </Typography>
             </Box>
@@ -95,14 +131,18 @@ export default function History() {
                     sx={{
                       padding: 2,
                       borderRadius: 2,
+                      backgroundColor: '#f9f9f9',
                       transition: 'transform 0.3s, box-shadow 0.3s',
                       '&:hover': {
                         transform: 'scale(1.05)',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
                       },
                     }}
                   >
-                    <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ fontWeight: 'bold', mb: 1, color: '#2e3b55' }}
+                    >
                       {item.productName}
                     </Typography>
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
@@ -111,7 +151,10 @@ export default function History() {
                     <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
                       Quantity: {item.quantity}
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 'bold', color: '#3f51b5' }}
+                    >
                       Points per Item: {item.point}
                     </Typography>
                   </Paper>
@@ -121,7 +164,10 @@ export default function History() {
           </Paper>
         ))
       ) : (
-        <Typography variant="body1" sx={{ textAlign: 'center', color: '#888', mt: 4 }}>
+        <Typography
+          variant="body1"
+          sx={{ textAlign: 'center', color: '#888', mt: 4 }}
+        >
           No orders found.
         </Typography>
       )}
