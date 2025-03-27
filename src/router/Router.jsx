@@ -5,7 +5,7 @@ import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import CartPage from '../pages/CartPage';
 import Delivery from '../pages/Delivery';
-import WishList from '../pages/WishList';
+import WishList from '../pages/wishList';
 import History from '../pages/History';
 import NotFound from '../pages/NotFound';
 import { useAuth } from '../auth/AuthContext'; 
