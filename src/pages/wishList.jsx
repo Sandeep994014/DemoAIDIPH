@@ -4,11 +4,10 @@ import { Card, CardContent, Typography, CardMedia, CardActions, Button, Grid, Bo
 import { Link } from 'react-router-dom';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { useFavorites } from '../contexts/FavoritesContext';
 import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function WishList() {
-  const { addToFavorites, removeFromFavorites } = useFavorites();
   const [wishlist, setWishlist] = useState([]);
   console.log("wishlist from wishlist page ",wishlist);
   const [wishlistStatus, setWishlistStatus] = useState(new Set());
@@ -48,7 +47,7 @@ export default function WishList() {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        alert('Please log in first.');
+        toast.error('Please log in first.');
         return;
       }
 
@@ -60,8 +59,9 @@ export default function WishList() {
         newStatus.delete(product.productId);
         return newStatus;
       });
+      toast.success('Product removed from wishlist.');
     } catch (error) {
-      alert(error.response?.data?.message);
+      toast.error(error.response?.data?.message || 'Error updating wishlist.');
     }
   };
 
@@ -72,7 +72,7 @@ export default function WishList() {
       setSelectedProduct(productDetails);
       setOpenDialog(true);
     } catch (error) {
-      console.log(error.response?.data?.message);
+      toast.error(error.response?.data?.message || 'Error fetching product details.');
     }
   };
 
@@ -83,6 +83,7 @@ export default function WishList() {
 
   return (
     <Box sx={{ padding: 4 }}>
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
       <Button variant="" color="primary" component={Link} to="/">
         <ArrowBackIosIcon sx={{ mr: 1 }} />
         Continue Shopping
@@ -124,7 +125,7 @@ export default function WishList() {
                       handleToggleWishlist(product);
                     }}
                     sx={{
-                      color: wishlistStatus.has(product.productId) === true ? 'red' : 'red',
+                      color: wishlistStatus.has(product.productId)?'ihnherit':'red',
                     }}
                   >
                     <FavoriteIcon />

@@ -19,7 +19,7 @@ export const login = async (payloadData) => {
 
     return response;
   } catch (error) {
-    // toast.error(error?.response?.data?.message);
+    console.error(error?.response?.data?.message);
     throw error;
   }
 };
