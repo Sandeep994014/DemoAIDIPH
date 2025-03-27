@@ -3,6 +3,8 @@ import { Button, TextField, Box, Typography, IconButton, InputAdornment, Grid, C
 import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import { login } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -42,110 +44,115 @@ export default function LoginPage() {
     
     try {
       const response = await login({ email, password });
-      
+      console.log("Login Response:", response);
       if (response?.status === 201) {
+       
         navigate('/');
       } else {
-        alert(error?.response?.data?.message);
+        toast.error(response?.data?.message); 
       }
     } catch (error) {
       console.error("Error during login:", error.message);
-      const errorMessage = error?.response?.data?.message;
-      alert(errorMessage);
+      const errorMessage = error?.response?.data?.message; 
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Grid container sx={{ minHeight: '90vh', justifyContent: 'center', alignItems: 'center', backgroundColor: 'linear-gradient(to bottom, #000, #222)' }}>
-    
-      <Grid item xs={12} md={6}>
-        <Card
-          sx={{
-            maxWidth: 400,
-            padding: 4,
-            borderRadius: 2,
-            boxShadow: 3,
-            backgroundColor: 'background.paper',
-            animation: 'slide-up 0.5s ease-in-out',
-            margin: 'auto', // Center the card horizontally
-          }}
-        >
-          <CardContent>
-            <Box sx={{ textAlign: 'center', marginBottom: 4 }}>
-              <Box sx={{ backgroundColor: 'primary.main', color: 'white', width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', margin: '0 auto' }}>
-                A
+    <>
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
+      <Grid container sx={{ minHeight: '90vh', justifyContent: 'center', alignItems: 'center', backgroundColor: 'linear-gradient(to bottom, #000, #222)' }}>
+      
+        <Grid item xs={12} md={6}>
+          <Card
+            sx={{
+              maxWidth: 400,
+              padding: 4,
+              borderRadius: 2,
+              boxShadow: 3,
+              backgroundColor: 'background.paper',
+              animation: 'slide-up 0.5s ease-in-out',
+              margin: 'auto', // Center the card horizontally
+            }}
+          >
+            <CardContent>
+              <Box sx={{ textAlign: 'center', marginBottom: 4 }}>
+                <Box sx={{ backgroundColor: 'primary.main', color: 'white', width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', margin: '0 auto' }}>
+                  A
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: 2, color: 'text.primary' }}>
+                  AIDIPH
+                </Typography>
               </Box>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: 2, color: 'text.primary' }}>
-                AIDIPH
-              </Typography>
-            </Box>
-            
-            <form onSubmit={handleLogin}>
-              <TextField
-                label="Email"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={!!errors.email}
-                helperText={errors.email}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email />
-                    </InputAdornment>
-                  ),
-                }}
-              />
               
-              <TextField
-                label="Password"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={!!errors.password}
-                helperText={errors.password}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handlePasswordToggle} edge="end">
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                sx={{
-                  marginTop: 3,
-                  padding: '12px',
-                  backgroundColor: '#7165EF',
-                  fontWeight: 'bold',
-                }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Logging in...' : 'Sign In'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              <form onSubmit={handleLogin}>
+                <TextField
+                  label="Email"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                
+                <TextField
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  error={!!errors.password}
+                  helperText={errors.password}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handlePasswordToggle} edge="end">
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{
+                    marginTop: 3,
+                    padding: '12px',
+                    backgroundColor: '#7165EF',
+                    fontWeight: 'bold',
+                  }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Logging in...' : 'Sign In'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-    </Grid>
+      <ToastContainer/>
+    </>
   );
 }

@@ -9,9 +9,12 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../auth/AuthContext';
 import jwt_decode from 'jwt-decode';
 import { fetchCart, updateQuantity as updateQuantityService, removeFromCart as removeFromCartService, profileUser } from '../services/auth';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const CartPage = () => {
   const { getCartTotal } = useCart();
-  const { isAuthenticated, userId } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { favorites } = useFavorites();
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
@@ -19,7 +22,6 @@ const CartPage = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [cart, setCart] = useState([]);
-  console.log("cart", cart);
   const [userPoints, setUserPoints] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingPoints, setLoadingPoints] = useState(true);
@@ -42,36 +44,44 @@ const CartPage = () => {
       }));
       setCart(arr);
     } catch (error) {
+      toast.error('Failed to load cart');
       console.error('Failed to load cart', error);
     } finally {
       setLoading(false);
     }
   };
   useEffect(() => {
-    cartItems();
-  }, []);
+    const fetchData = async () => {
+      await cartItems(); // Fetch cart data
+      setCartTotal(getCartTotal());
+    };
+    fetchData();
+  }, [getCartTotal]);
+
   useEffect(() => {
-    setCartTotal(getCartTotal());
     setTotalPoints(cart.reduce((acc, product) => acc + product.points * product.quantity, 0));
     setTotalProducts(cart.reduce((acc, product) => acc + product.quantity, 0));
-  }, [cart, getCartTotal]);
-  const fetchUserPoints = async () => {
-    try {
-      setLoadingPoints(true);
-      const authToken = localStorage.getItem('authToken');
-      const decode = jwt_decode(authToken);
-      if (!authToken) {
-        throw new Error('No auth token found');
-      }
-      const response = await profileUser(authToken, userId);
-      setUserPoints(response.points);
-    } catch (error) {
-      console.log(error.response?.data?.message);
-    } finally {
-      setLoadingPoints(false);
-    }
-  };
+  }, [cart]);
+
   useEffect(() => {
+    const fetchUserPoints = async () => {
+      try {
+        setLoadingPoints(true);
+        const authToken = localStorage.getItem('authToken');
+        const decode = jwt_decode(authToken);
+        const userId = decode.userId;
+        if (!authToken) {
+          throw new Error('No auth token found');
+        }
+        const response = await profileUser(authToken, userId);
+        setUserPoints(response.points);
+      } catch (error) {
+        console.log(error.response?.data?.message);
+      } finally {
+        setLoadingPoints(false);
+      }
+    };
+
     fetchUserPoints();
   }, []);
   const handleUpdateQuantity = async (productId, quantityChange, size) => {
@@ -91,8 +101,9 @@ const CartPage = () => {
           return [...prevCart, newProduct];
         }
       });
+      toast.success('Quantity updated successfully');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to update quantity');
+      toast.error(error.response?.data?.message || 'Failed to update quantity');
     }
   };
   const handleRemoveFromCart = async (productId, size) => {
@@ -100,16 +111,18 @@ const CartPage = () => {
       const authToken = localStorage.getItem('authToken');
       await removeFromCartService(productId, size, authToken);
       setCart(prevCart => prevCart.filter(product => product.id !== productId || product.size !== size)); 
+      toast.success('Product removed from cart');
     } catch (error) {
-      alert('Failed to remove product from cart');
+      toast.error('Failed to remove product from cart');
     }
   };
   const handleCheckout = () => {
     if (isAuthenticated) {
       if (totalPoints <= userPoints) {
         navigate("/delivery");
+        toast.success('Proceeding to checkout');
       } else {
-        alert("You do not have enough points to place this order.");
+        toast.error("You do not have enough points to place this order.");
       }
     }
   };
@@ -270,6 +283,7 @@ const CartPage = () => {
             </Card>
           </Box>
         </Stack>
+        <ToastContainer />
       </Box>
     );
   }

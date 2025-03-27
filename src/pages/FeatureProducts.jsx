@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Card, CardContent, CardMedia, Button, Typography, Grid, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
+import { Card, CardContent, CardMedia, Button, Typography, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { getProducts, toggleWishlist, addToCart as addToCartAPI } from '../services/auth';  
-import { useAuth } from '../auth/AuthContext'; 
 import { Favorite } from '@mui/icons-material'; 
 import { useCart } from '../contexts/CartContext'; 
 import { useFavorites } from '../contexts/FavoritesContext'; 
+import { toast , ToastContainer } from 'react-toastify'; // Added import for react-toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import react-toastify styles
+
 export default function FeatureProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSize, setSelectedSize] = useState({}); 
-  const [cartError, setCartError] = useState('');
   const [cartSuccess, setCartSuccess] = useState('');
+  console.log("cartSuccess", cartSuccess);
   const [userId, setUserId] = useState(null); 
   const [authToken, setAuthToken] = useState(null); 
   const { addToCart } = useCart(); 
@@ -63,8 +64,8 @@ export default function FeatureProducts() {
   };
   const handleAddToCart = async (product, quantity) => {
     if (!selectedSize[product.id]) {
-      setCartError("Please select a size before adding to cart.");
       setCartSuccess("");
+      toast.error("Please select a size before adding to cart."); // Replaced alert with toast
       return;
     }
     const selectedQuantity = quantity > 0 ? quantity : 1;
@@ -79,11 +80,10 @@ export default function FeatureProducts() {
         image: selectedSize[product.id]?.imageUrls[0] || product.imageUrls[0],
       });
       const response = await addToCartAPI(product.id, selectedQuantity, selectedSizeValue, authToken);
-      alert(response.message); 
+      toast.success(response.message); // Replaced alert with toast
       setCartSuccess("Product added to cart successfully!");
-      setCartError("");
     } catch (error) {
-      setCartError("Failed to add the product to the cart. Please try again.");
+      toast.error("Failed to add product to cart. Please try again."); // Replaced alert with toast
       setCartSuccess("");
     }
   };
@@ -92,8 +92,10 @@ export default function FeatureProducts() {
       const product = products.find((p) => p.id === productId);
       if (product.isInWishlist) {
         removeFromFavorites(productId); 
+        toast.info("Removed from wishlist."); // Added toast for removing from wishlist
       } else {
         addToFavorites(product); 
+        toast.success("Added to wishlist."); // Added toast for adding to wishlist
       }
       await toggleWishlist(productId, authToken);
       setProducts((prevState) =>
@@ -104,6 +106,7 @@ export default function FeatureProducts() {
         )
       );
     } catch (error) {
+      toast.error("Error toggling wishlist. Please try again."); // Replaced alert with toast
       console.error('Error toggling wishlist:', error);
     }
   };
@@ -121,74 +124,70 @@ export default function FeatureProducts() {
       <Typography textAlign={'center'} variant="h3" gutterBottom>
         Featured Products
       </Typography>
-      <Grid container spacing={3}>
-        {products.map((product) => (
-          <Grid item xs={12} sm={6} md={4} key={product.id}>
-            <Card sx={{ maxWidth: 345 }}>
-              <CardMedia
-                component="img"
-                height="260"
-                image={selectedSize[product.id]
-                    ? selectedSize[product.id]?.imageUrls[0]
-                    : (product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : '/placeholder.jpg')}
-                alt={product.name}
-              />
-              <CardContent>
-                <Typography variant="h6" component="div">
-                  {product.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {product.brand}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  {product.description}
-                </Typography>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Typography variant="body2" color="text.primary">
-                    {product.point} Points
+      <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={3}>
+        {products.map((product) => {
+          const productImage = selectedSize[product.id]?.imageUrls?.[0] || product.imageUrls?.[0] || '/placeholder.jpg';
+          return (
+            <Box key={product.id}>
+              <Card sx={{ maxWidth: 345 }}>
+                <CardMedia
+                  component="img"
+                  height="260"
+                  image={productImage}
+                  alt={product.name}
+                />
+                <CardContent>
+                  <Typography variant="h6" component="div">
+                    {product.name}
                   </Typography>
-                </Box>
-                <FormControl fullWidth>
-                  <InputLabel>Size</InputLabel>
-                  <Select
-                    value={selectedSize[product.id]?.size || ''}
-                    onChange={(e) => handleSizeChange(product.id, product.productVariants.find(variant => variant.size === e.target.value))}
-                    label="Size"
-                  >
-                    {product.productVariants.map((variant) => (
-                      <MenuItem key={variant.id} value={variant.size}>
-                        {variant.size} - {variant.color}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </CardContent>
-              <Grid container spacing={2} sx={{ padding: 2 }}>
-                <Grid item xs={9}>
+                  <Typography variant="body2" color="text.secondary">
+                    {product.brand}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {product.description}
+                  </Typography>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <Typography variant="body2" color="text.primary">
+                      {product.point} Points
+                    </Typography>
+                  </Box>
+                  <FormControl fullWidth>
+                    <InputLabel>Size</InputLabel>
+                    <Select
+                      value={selectedSize[product.id]?.size || ''}
+                      onChange={(e) => handleSizeChange(product.id, product.productVariants.find(variant => variant.size === e.target.value))}
+                      label="Size"
+                    >
+                      {product.productVariants.map((variant) => (
+                        <MenuItem key={variant.id} value={variant.size}>
+                          {variant.size} - {variant.color}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </CardContent>
+                <Box display="flex" justifyContent="space-between" padding={2}>
                   <Button
-                    fullWidth
                     variant="contained"
                     color="primary"
-                    onClick={() => handleAddToCart(product, 1)} 
+                    onClick={() => handleAddToCart(product, 1)}
                   >
                     Add to Cart
                   </Button>
-                </Grid>
-                <Grid item xs={3}>
                   <Button
-                    fullWidth
                     variant=""
                     color="secondary"
-                    onClick={() => handleToggleWishlist(product.id)} 
+                    onClick={() => handleToggleWishlist(product.id)}
                   >
-                    <Favorite sx={{fontSize: 30}} color={product.isWishlisted === true ? "error" : "primary"} />
+                    <Favorite sx={{ fontSize: 30 }} color={product.isWishlisted === true ? "error" : "primary"} />
                   </Button>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                </Box>
+              </Card>
+            </Box>
+          );
+        })}
+      </Box>
+      <ToastContainer />
     </div>
   );
 }

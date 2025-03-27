@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { toast, ToastContainer } from 'react-toastify';
 
 export default function WishList() {
   const { addToFavorites, removeFromFavorites } = useFavorites();
@@ -149,6 +150,7 @@ export default function WishList() {
           </Button>
         </DialogActions>
       </Dialog>
+      <ToastContainer/>
     </Box>
   );
 }

@@ -19,14 +19,26 @@ export const login = async (payloadData) => {
 
     return response;
   } catch (error) {
-    toast.error('Login failed. Please check your credentials.');
+    // toast.error(error?.response?.data?.message);
     throw error;
   }
 };
 
+import jwt_decode from "jwt-decode";
+
 export const getToken = () => {
-  return localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
+  if (!token) return null; // Handle missing token case
+
+  try {
+    const decodedToken = jwt_decode(token);
+    return decodedToken.userId; // Extract userId from the decoded token
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return null; // Handle invalid token case
+  }
 };
+
 
 export const getEmployeeData = async (employeeId) => {
   try {
@@ -295,7 +307,7 @@ export const removeFromWishlist = async (productId, authToken) => {
 export const checkoutOrder = async (authToken) => {
   try {
     const response = await axiosInstance.post(
-      `/api/v1/reward-service/order/check-out?employeeId=1&addressId=1`, 
+      `/api/v1/reward-service/order/check-out?employeeId=${employeeId}&addressId=${addressId}`, 
       {}, 
       {
         headers: {

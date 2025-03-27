@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getAddress, updateAddress, checkoutOrder, fetchCart } from '../services/auth';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { Link } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Delivery = () => {
   const navigate = useNavigate();
@@ -115,7 +117,7 @@ const Delivery = () => {
   const handleUpdateAddress = async () => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
-      alert('No authentication token found.');
+      toast.error('No authentication token found.');
       return;
     }
 
@@ -131,9 +133,10 @@ const Delivery = () => {
       await updateAddress(updatedAddress, authToken); 
       fetchAddresses(); 
       setOpenEditDialog(false); 
+      toast.success('Address updated successfully.');
     } catch (error) {
       console.error('Failed to update address:', error);
-      alert(error.response?.data?.message || 'Error updating address.');
+      toast.error(error.response?.data?.message || 'Error updating address.');
     }
   };
 
@@ -153,8 +156,9 @@ const Delivery = () => {
 
       const updatedAddress = updatedAddresses.find((address) => address.id === addressId);
       await updateAddress(updatedAddress, authToken);
+      toast.success('Default address updated successfully.');
     } catch (error) {
-      alert(error.response.data.message);
+      toast.error(error.response?.data?.message || 'Error updating default address.');
     }
   };
 
@@ -188,13 +192,13 @@ const Delivery = () => {
       const response = await checkoutOrder(employeeId, authToken);
       console.log("Checkout Response:", response);
       if (response.message === 'Order placed successfully.') {
-        alert("Order placed successfully!");
+        toast.success(response.message);
         navigate("/order-history");
       } else {
-        alert(response?.data?.message);
+        toast.error(response?.data?.message);
       }
     } catch (error) {
-      alert(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message || 'Error during checkout.');
     }
   };
 
@@ -207,8 +211,7 @@ const Delivery = () => {
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#2e3b55', textAlign: 'center', mb: 4 }}>
         Order Delivery
       </Typography>
-     
-
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
       <Grid container spacing={4} mt={1}>
         {/* Address Section */}
         <Grid item xs={12} md={6}>
@@ -219,10 +222,10 @@ const Delivery = () => {
             <Button
               variant="contained"
               color="primary"
-              size="small"
+              size="large"
               component={Link}
               to="/address"
-              sx={{ mb: 3, display: 'block', mx: 'auto' }}
+              sx={{ mb: 3, display: 'flex', }}
             >
               Add New Address
             </Button>

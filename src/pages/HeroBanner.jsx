@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Card, CardContent, Divider, Avatar, styled, Button } from '@mui/material';
 import { profileUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
 import jwtDecode from 'jwt-decode'; 
 const StyledCard = styled(Card)(() => ({
   padding: '20px',
@@ -72,8 +71,8 @@ const HeroBanner = () => {
       <Grid container spacing={4}>
         {}
         <Grid item xs={12} md={4}>
-          <StyledCard>
-            <CardContent>
+          <StyledCard sx={{ bgcolor: '#f5f5f5',}}>
+            <CardContent >
               <StyledAvatar alt="User Avatar">{profile.firstName?.[0] || 'U'}</StyledAvatar>
               <Typography variant="h5" align="center" sx={{ fontWeight: 'bold', mb: 1 }}>
                 {profile.firstName} {profile.lastName}
@@ -98,7 +97,7 @@ const HeroBanner = () => {
         </Grid>
         {}
         <Grid item xs={12} md={8}>
-          <StyledCard sx={{ height: '100%' }}>
+          <StyledCard sx={{ height: '100%' , bgcolor: '#f5f5f5', }}>
             <Grid container spacing={4} sx={{ height: '100%' }}>
               <Grid
                 item
@@ -116,6 +115,7 @@ const HeroBanner = () => {
               <Grid item xs={12} md={6}>
                 <Box
                   sx={{
+                   
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -123,11 +123,10 @@ const HeroBanner = () => {
                     transition: 'transform 0.5s ease',
                   }}
                 >
-                  <img
-                    src="https:
-                    alt="Product Preview"
-                    style={{ width: '80%', borderRadius: '12px' }}
-                  />
+                  <img src="https://www.apple.com/v/airpods/x/images/overview/airpods_max_purple__d9y3g3n7cnyq_large.png" alt="Product"
+  style={{ width: '80%', borderRadius: '12px' }}
+/>
+
                 </Box>
               </Grid>
             </Grid>
