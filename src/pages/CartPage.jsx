@@ -116,16 +116,30 @@ const CartPage = () => {
       toast.error('Failed to remove product from cart');
     }
   };
-  const handleCheckout = () => {
-    if (isAuthenticated) {
-      if (totalPoints <= userPoints) {
-        navigate("/delivery");
-        toast.success('Proceeding to checkout');
-      } else {
+  const handleCheckout = async () => {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      toast.error('Authentication token is missing.');
+      return;
+    }
+  
+    try {
+      const decode = jwt_decode(authToken);
+      const userId = decode.userId; // Decode userId from the token
+  
+      if (totalPoints > userPoints) {
         toast.error("You do not have enough points to place this order.");
+        return;
       }
+  
+      toast.success('Proceeding to checkout...');
+      navigate("/delivery");
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      toast.error('An error occurred while proceeding to checkout.');
     }
   };
+  
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>

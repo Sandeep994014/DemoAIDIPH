@@ -6,6 +6,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import jwt_decode from 'jwt-decode'; // Ensure this import is present
 
 const Delivery = () => {
   const navigate = useNavigate();
@@ -27,14 +28,16 @@ const Delivery = () => {
   const fetchUserPoints = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
+      const decode = jwt_decode(authToken);
+      const userId = decode.userId;
       if (!authToken) {
         throw new Error('No auth token found');
       }
-      const response = await profileUser(authToken);
+      const response = await profileUser(authToken,userId);
       console.log("User Points:", response);
       setPoints(response?.points);
     } catch (error) {
-      console.log(error.response.data.message);
+      toast.error(error.response.data.message);
     }
   };
 
@@ -180,25 +183,38 @@ const Delivery = () => {
 
   const handleCheckout = async () => {
     const authToken = localStorage.getItem('authToken');
-    const employeeId = authToken; 
-
-    if (!authToken || !employeeId) {
-      console.error('Auth token or employeeId missing');
+    if (!authToken) {
+      console.error('Auth token missing');
+      toast.error('Authentication token is missing.');
       return;
     }
 
-    console.log("Sending checkout request with token:", authToken);
     try {
-      const response = await checkoutOrder(employeeId, authToken);
-      console.log("Checkout Response:", response);
+      const decode = jwt_decode(authToken);
+      const userId = decode.userId; // Decode userId from the token
+
+      // Find the default address
+      const defaultAddress = addresses.find((address) => address.isDefault);
+      if (!defaultAddress) {
+        toast.error(error?.response?.data?.message );
+        return;
+      }
+
+      const addressId = defaultAddress.id; // Get the selected address ID
+
+      const response = await checkoutOrder(userId, addressId, authToken); // Pass userId as employeeId
+      console.log("Checkout Response:", response.message);
       if (response.message === 'Order placed successfully.') {
-        toast.success(response.message);
-        navigate("/order-history");
+        toast.success( 'Order placed successfully.');
+        setTimeout(() => {
+          navigate("/order-history");
+        }, 2000);
       } else {
-        toast.error(response?.data?.message);
+        toast.error(response?.data?.message || 'Error during checkout.');
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || 'Error during checkout.');
+ 
+      toast.error(error?.response?.message);
     }
   };
 
@@ -352,6 +368,7 @@ const Delivery = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ToastContainer />
     </Box>
   );
 };

@@ -304,7 +304,7 @@ export const removeFromWishlist = async (productId, authToken) => {
 };  
 
 // checkout order api
-export const checkoutOrder = async (authToken) => {
+export const checkoutOrder = async (employeeId, addressId, authToken) => {
   try {
     const response = await axiosInstance.post(
       `/api/v1/reward-service/order/check-out?employeeId=${employeeId}&addressId=${addressId}`, 
