@@ -1,4 +1,3 @@
-// src/router/Router.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -9,7 +8,7 @@ import Delivery from '../pages/Delivery';
 import WishList from '../pages/WishList';
 import History from '../pages/History';
 import NotFound from '../pages/NotFound';
-import { useAuth } from '../auth/AuthContext'; // Ensure useAuth is imported
+import { useAuth } from '../auth/AuthContext'; 
 import Address from '../pages/Address';
 
 function RequireAuth({ children }) {
